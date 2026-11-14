@@ -168,6 +168,120 @@ body {
   outline-offset: 1px;
 }
 
+.search-row {
+  margin-top: 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.search-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 7px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: #191a20;
+  color: var(--text);
+  font: 12px var(--font, inherit);
+  outline: none;
+}
+
+.search-input::placeholder {
+  color: var(--muted);
+}
+
+.search-input:focus-visible {
+  border-color: var(--neon-cyan);
+  outline: 2px solid rgba(46, 230, 246, 0.35);
+  outline-offset: 1px;
+}
+
+.search-colors {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.search-all {
+  padding: 3px 8px;
+  border-radius: 5px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--muted);
+  font: 600 9px var(--font, inherit);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.search-all[aria-pressed="true"] {
+  border-color: transparent;
+  background: var(--grad);
+  color: #14151a;
+}
+
+.search-dot {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background: var(--swatch);
+  cursor: pointer;
+  padding: 0;
+}
+
+.search-dot[aria-pressed="true"] {
+  border-color: #f1f0ed;
+  box-shadow: 0 0 0 2px #202127 inset;
+}
+
+.note-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 7px 2px;
+  border-bottom: 1px solid var(--line);
+  text-decoration: none;
+  color: var(--text);
+}
+
+.note-row:last-child {
+  border-bottom: 0;
+}
+
+.note-row:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.note-dot {
+  width: 6px;
+  height: 26px;
+  border-radius: 4px;
+  flex: none;
+  margin-top: 1px;
+}
+
+.note-body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.note-text {
+  font-size: 12px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.note-meta {
+  font: 9px/1.3 var(--mono);
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
 .videos-section {
   margin-top: 13px;
 }

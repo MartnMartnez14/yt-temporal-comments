@@ -143,6 +143,30 @@
     return valid.sort((a, b) => a.timestamp - b.timestamp);
   }
 
+  // Filtro compartido por el panel y el popup: texto libre (sin distinguir mayúsculas ni
+  // acentos) y color exacto. Con los dos vacíos devuelve la lista tal cual.
+  function normalizeSearchText(value) {
+    return String(value || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim();
+  }
+
+  function filterComments(list, options = {}) {
+    const items = Array.isArray(list) ? list : [];
+    const term = normalizeSearchText(options.query);
+    const color = typeof options.color === 'string' ? options.color.toLowerCase() : '';
+    if (!term && !color) return items.slice();
+
+    return items.filter((comment) => {
+      if (!comment) return false;
+      if (color && String(comment.color).toLowerCase() !== color) return false;
+      if (!term) return true;
+      return normalizeSearchText(comment.text).includes(term);
+    });
+  }
+
   // Markdown con enlaces directos al instante, para pegar en Notion u Obsidian.
   function commentsToMarkdown(videoId, videoTitle, comments) {
     const list = Array.isArray(comments)
@@ -205,6 +229,8 @@
     createComment,
     editComment,
     commentsToMarkdown,
+    normalizeSearchText,
+    filterComments,
   };
 
   globalThis.YTTemporalCommon = api;

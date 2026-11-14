@@ -1,6 +1,7 @@
 (() => {
   'use strict';
 
+  const Common = globalThis.YTTemporalCommon;
   const Store = globalThis.YTTemporalStore;
   const I18n = globalThis.YTTemporalI18n;
 
@@ -10,6 +11,9 @@
     versionPill: document.getElementById('version-pill'),
     syncToggle: document.getElementById('sync-toggle'),
     languageSelect: document.getElementById('language-select'),
+    searchInput: document.getElementById('search-input'),
+    searchColors: document.getElementById('search-colors'),
+    listTitle: document.getElementById('list-title'),
     videosList: document.getElementById('videos-list'),
     emptyMsg: document.getElementById('empty-msg'),
     exportBtn: document.getElementById('export-btn'),
@@ -21,6 +25,13 @@
 
   // Último estado mostrado, para poder volver a pintarlo al cambiar de idioma.
   let lastStatus = null;
+
+  // Filtro del popup: busca en las notas de todos los videos.
+  const filters = { query: '', color: '' };
+
+  function filterActive() {
+    return filters.query !== '' || filters.color !== '';
+  }
 
   // La versión sale del manifiesto para que no quede desactualizada al subir la extensión.
   function renderVersion() {
@@ -56,9 +67,14 @@
     I18n.applyDom(document);
     if (els.languageSelect) els.languageSelect.value = I18n.normalizePreference(preference);
     renderStatus();
+    renderSearchColors();
+    safeRefresh();
   }
 
   async function renderDashboard() {
+    if (els.listTitle) els.listTitle.textContent = I18n.t('recentVideos');
+    els.emptyMsg.textContent = I18n.t('emptyVideos');
+
     const [settings, summaries] = await Promise.all([
       Store.getSettings(),
       Store.getAllVideosSummary(),
@@ -100,6 +116,116 @@
       els.videosList.append(link);
     });
   }
+
+  // Chips de color del popup: "Todos" más la paleta de marcadores.
+  function renderSearchColors() {
+    if (!els.searchColors) return;
+    els.searchColors.replaceChildren();
+
+    const allBtn = document.createElement('button');
+    allBtn.type = 'button';
+    allBtn.className = 'search-all';
+    allBtn.textContent = I18n.t('filterAll');
+    allBtn.title = I18n.t('filterClear');
+    allBtn.setAttribute('aria-pressed', String(filters.color === ''));
+    allBtn.addEventListener('click', () => {
+      filters.color = '';
+      renderSearchColors();
+      safeRefresh();
+    });
+    els.searchColors.append(allBtn);
+
+    Common.COLORS.forEach((color) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'search-dot';
+      btn.style.setProperty('--swatch', color.value);
+      btn.setAttribute('aria-pressed', String(filters.color === color.value));
+      btn.setAttribute('aria-label', I18n.colorLabel(color.value));
+      btn.title = I18n.colorLabel(color.value);
+      btn.addEventListener('click', () => {
+        filters.color = filters.color === color.value ? '' : color.value;
+        renderSearchColors();
+        safeRefresh();
+      });
+      els.searchColors.append(btn);
+    });
+  }
+
+  // Resultados de la búsqueda: cada nota con su video, su instante y su fecha.
+  async function renderSearch() {
+    const matches = await Store.searchComments(filters);
+    if (els.listTitle) els.listTitle.textContent = I18n.t('popupResultsTitle');
+
+    els.videosList.replaceChildren();
+    if (matches.length === 0) {
+      els.emptyMsg.hidden = false;
+      els.emptyMsg.textContent = I18n.t('popupNoMatches');
+      els.videosList.append(els.emptyMsg);
+      return;
+    }
+
+    els.emptyMsg.hidden = true;
+    matches.forEach((match) => {
+      const link = document.createElement('a');
+      link.className = 'note-row';
+      const seconds = Math.max(0, Math.floor(Number(match.timestamp) || 0));
+      link.href = `https://www.youtube.com/watch?v=${encodeURIComponent(match.videoId)}&t=${seconds}s`;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+
+      const dot = document.createElement('span');
+      dot.className = 'note-dot';
+      dot.style.background = match.color;
+      dot.setAttribute('aria-hidden', 'true');
+
+      const body = document.createElement('span');
+      body.className = 'note-body';
+
+      const text = document.createElement('span');
+      text.className = 'note-text';
+      text.textContent = match.text;
+
+      const when = I18n.formatCommentDate(match.createdAt);
+      const meta = document.createElement('span');
+      meta.className = 'note-meta';
+      meta.textContent = [
+        match.videoTitle,
+        Common.formatTime(match.timestamp),
+        when ? `${when.date} ${when.time}` : '',
+      ].filter(Boolean).join(' · ');
+
+      body.append(text, meta);
+      link.append(dot, body);
+      els.videosList.append(link);
+    });
+  }
+
+  function safeRefresh() {
+    refreshList().catch((err) => console.error('[YTTemporal] no se pudo actualizar la lista', err));
+  }
+
+  async function refreshList() {
+    if (filterActive()) {
+      await renderSearch();
+      return;
+    }
+    await renderDashboard();
+  }
+
+  els.searchInput.addEventListener('input', () => {
+    filters.query = els.searchInput.value;
+    safeRefresh();
+  });
+
+  els.searchInput.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && els.searchInput.value) {
+      event.preventDefault();
+      els.searchInput.value = '';
+      filters.query = '';
+      safeRefresh();
+    }
+  });
 
   els.syncToggle.addEventListener('change', async () => {
     await Store.saveSettings({ syncEnabled: els.syncToggle.checked });
@@ -176,7 +302,7 @@
     const settings = await Store.getSettings();
     applyLanguage(settings.language);
     renderVersion();
-    await renderDashboard();
+    await refreshList();
   }
 
   init();

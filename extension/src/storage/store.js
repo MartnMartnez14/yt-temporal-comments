@@ -260,6 +260,36 @@
     return blocks.join('\n');
   }
 
+  // Busca en las notas de todos los videos. Devuelve cada coincidencia con el video al que
+  // pertenece, ordenadas por título del video y después por instante.
+  async function searchComments(options = {}) {
+    const allLocal = await rawGet('local', null);
+    const index = allLocal[Common.INDEX_KEY] && typeof allLocal[Common.INDEX_KEY] === 'object'
+      ? allLocal[Common.INDEX_KEY]
+      : {};
+    const matches = [];
+
+    for (const [key, val] of Object.entries(allLocal)) {
+      if (!key.startsWith(Common.STORAGE_PREFIX)) continue;
+      const videoId = key.slice(Common.STORAGE_PREFIX.length);
+      if (!/^[\w-]{11}$/.test(videoId)) continue;
+      const comments = Common.validateCommentsArray(val, videoId);
+      if (comments.length === 0) continue;
+      const found = Common.filterComments(comments, options);
+      if (found.length === 0) continue;
+      const title = index[videoId]?.title
+        || comments.find((c) => c.videoTitle)?.videoTitle
+        || `youtube.com/watch?v=${videoId}`;
+      for (const comment of found) {
+        matches.push({ ...comment, videoId, videoTitle: title });
+      }
+    }
+
+    return matches.sort((a, b) => (
+      a.videoTitle.localeCompare(b.videoTitle) || a.timestamp - b.timestamp
+    ));
+  }
+
   // Errores de importación con código estable: el popup los traduce al idioma activo.
   function importError(code) {
     const error = new Error(code);
@@ -311,6 +341,7 @@
     getAllVideosSummary,
     exportAllToJson,
     exportAllToMarkdown,
+    searchComments,
     importFromJson,
   };
 

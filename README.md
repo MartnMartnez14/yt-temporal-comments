@@ -4,7 +4,7 @@
 
 Repositorio oficial: [MartnMartnez14/yt-temporal-comments](https://github.com/MartnMartnez14/yt-temporal-comments)
 
-Estado: extensión completa y probada (v0.7.0, Manifest V3), ya bilingüe. La cuenta de desarrollador
+Estado: extensión completa y probada (v0.8.0, Manifest V3), ya bilingüe. La cuenta de desarrollador
 está registrada y verificada y el proyecto está en la etapa de publicación en la Chrome Web Store.
 La extensión es gratuita y no tiene funciones de pago.
 
@@ -64,6 +64,7 @@ ExtChromYoutComentColors/
 - **Integración nativa en YouTube:** Funciona directamente sobre el reproductor de `youtube.com/watch` detectando la navegación dinámica (SPA) sin recargar la página.
 - **Mapa visual por colores:** Creá notas en el segundo exacto y clasificálas con una paleta de 10 colores.
 - **Cada nota con su fecha:** A la derecha de cada nota se muestra la fecha y hora local en que la guardaste (`dd/mm/aaaa` y `hh:mm:ss`), tomada del campo `createdAt` que ya viaja en los respaldos.
+- **Buscador y filtro:** buscá por texto (sin importar mayúsculas ni acentos) o filtrá por color dentro del video, y buscá en las notas de todos tus videos desde el popup.
 - **Bilingüe español/inglés:** selector *Automático / Español / English* en el popup; el panel, el popup y las fechas cambian al instante, sin recargar la extensión.
 - **Notas editables:** el lápiz de cada nota abre su texto y su color en línea, sin perder el instante ni la fecha de creación. `Esc` cancela y `Ctrl+Enter` guarda.
 - **Identidad visual propia:** Panel oscuro con un degradé neón cian → violeta → rosa sobre el logo, el botón de guardar y el avance de la línea de tiempo. Los 10 colores de marcador quedan exclusivamente para tus notas: el color de la interfaz nunca se usa como color de etiqueta.
@@ -104,7 +105,7 @@ cd extension
 node --test tests/extension.test.js
 ```
 
-Salida esperada: `ℹ tests 25`, `ℹ pass 25`, `ℹ fail 0`. Cubren la validación y el saneamiento de notas, la capa de almacenamiento contra un mock de `chrome.storage`, el formateo de fechas, la exportación JSON y Markdown, el índice de videos, el contrato de render del panel (fecha/hora por nota, eventos del reloj, atajo `Alt+N`, edición de notas y reubicación en modo cine), el bilingüe (mismas claves en ambos idiomas, fechas y nombres de colores) y reglas de seguridad estática (sin `innerHTML`, sin recursos remotos).
+Salida esperada: `ℹ tests 31`, `ℹ pass 31`, `ℹ fail 0`. Cubren la validación y el saneamiento de notas, la capa de almacenamiento contra un mock de `chrome.storage`, el formateo de fechas, la exportación JSON y Markdown, el índice de videos, el contrato de render del panel (fecha/hora por nota, eventos del reloj, atajo `Alt+N`, edición de notas y reubicación en modo cine), el bilingüe (mismas claves en ambos idiomas, fechas y nombres de colores) y reglas de seguridad estática (sin `innerHTML`, sin recursos remotos).
 
 Los iconos se mantienen como SVG editable y se exportan a PNG con Inkscape:
 

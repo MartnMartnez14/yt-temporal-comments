@@ -47,9 +47,14 @@
       </select>
     </section>
 
+    <section class="search-row" aria-label="Buscar notas" data-i18n-aria-label="searchLabel">
+      <input type="search" id="search-input" class="search-input" data-i18n-placeholder="popupSearchPlaceholder" data-i18n-aria-label="searchLabel" placeholder="Buscar en todas las notas">
+      <div id="search-colors" class="search-colors" role="group" data-i18n-aria-label="filterColorsLabel"></div>
+    </section>
+
     <section class="videos-section" aria-label="Videos guardados" data-i18n-aria-label="videosSectionLabel">
       <div class="section-head">
-        <h2 data-i18n="recentVideos">Tus videos recientes</h2>
+        <h2 id="list-title" data-i18n="recentVideos">Tus videos recientes</h2>
       </div>
       <div class="videos-list" id="videos-list" aria-live="polite">
         <p class="empty-msg" id="empty-msg" data-i18n="emptyVideos">Abrí cualquier video en YouTube para empezar a guardar momentos.</p>

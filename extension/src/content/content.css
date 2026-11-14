@@ -569,6 +569,86 @@
   filter: brightness(1.08);
 }
 
+/* Búsqueda y filtro por color del listado */
+.ytt-filter {
+  margin-top: 9px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ytt-search {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 9px;
+  border-radius: 7px;
+  border: 1px solid #303139;
+  background: #191a20;
+  color: var(--text);
+  font: 11px var(--font);
+  outline: none;
+}
+
+.ytt-search::placeholder {
+  color: #70717b;
+}
+
+.ytt-search:focus {
+  border-color: rgba(46, 230, 246, 0.55);
+  box-shadow: 0 0 0 3px rgba(46, 230, 246, 0.08);
+}
+
+.ytt-filter-colors {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.ytt-filter-all {
+  padding: 3px 8px;
+  border-radius: 5px;
+  border: 1px solid #33343c;
+  background: #22232a;
+  color: #b9b8c2;
+  font: 600 9px var(--font);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.ytt-filter-all[aria-pressed="true"] {
+  border-color: transparent;
+  background: var(--grad);
+  color: #14151a;
+}
+
+.ytt-filter-dot {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background: var(--swatch);
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.15s, border-color 0.15s;
+}
+
+.ytt-filter-dot:hover {
+  transform: scale(1.12);
+}
+
+.ytt-filter-dot[aria-pressed="true"] {
+  border-color: #f1f0ed;
+  box-shadow: 0 0 0 2px #202127 inset;
+}
+
+.ytt-filter-info {
+  margin: 6px 0 0;
+  font: 9px var(--mono);
+  color: #85868f;
+}
+
 .ytt-footer {
   border-top: 1px solid #26272e;
   margin-top: 9px;

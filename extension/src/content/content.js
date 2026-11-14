@@ -17,6 +17,9 @@
   // Edición en línea: id de la nota abierta y color elegido en el borrador.
   let editingId = null;
   let editingColor = Common.COLORS[0];
+  // Filtro del listado: texto libre y color exacto ('' = todos).
+  let filterQuery = '';
+  let filterColor = '';
 
   function getYouTubeVideoElement() {
     return document.querySelector('video.html5-main-video') || document.querySelector('video');
@@ -232,6 +235,28 @@
 
     form.append(captureRow, textarea, colorLabel, colorPicker, errorMsg, saveBtn);
 
+    // Búsqueda y filtro por color del listado
+    const filterBox = document.createElement('div');
+    filterBox.className = 'ytt-filter';
+    filterBox.setAttribute('role', 'search');
+
+    const searchInput = document.createElement('input');
+    searchInput.type = 'search';
+    searchInput.className = 'ytt-search';
+    searchInput.placeholder = I18n.t('searchPlaceholder');
+    searchInput.setAttribute('aria-label', I18n.t('searchLabel'));
+
+    const filterColors = document.createElement('div');
+    filterColors.className = 'ytt-filter-colors';
+    filterColors.setAttribute('role', 'group');
+    filterColors.setAttribute('aria-label', I18n.t('filterColorsLabel'));
+
+    const filterInfo = document.createElement('p');
+    filterInfo.className = 'ytt-filter-info';
+    filterInfo.hidden = true;
+
+    filterBox.append(searchInput, filterColors);
+
     // List
     const list = document.createElement('div');
     list.className = 'ytt-list';
@@ -255,7 +280,7 @@
     videoIdSpan.textContent = '';
     footer.append(footerNote, videoIdSpan);
 
-    body.append(timelineBox, form, list, empty, footer);
+    body.append(timelineBox, form, filterBox, filterInfo, list, empty, footer);
     panel.append(header, body);
     root.append(panel);
 
@@ -277,6 +302,9 @@
       errorMsg,
       form,
       saveText,
+      searchInput,
+      filterColors,
+      filterInfo,
       list,
       empty,
       emptyText,
@@ -296,7 +324,56 @@
     });
 
     form.addEventListener('submit', onAddComment);
+
+    searchInput.addEventListener('input', () => {
+      filterQuery = searchInput.value;
+      renderComments();
+    });
+    searchInput.addEventListener('keydown', (event) => {
+      event.stopPropagation();
+      if (event.key === 'Escape' && searchInput.value) {
+        event.preventDefault();
+        searchInput.value = '';
+        filterQuery = '';
+        renderComments();
+      }
+    });
+
     renderColors();
+    renderFilterColors();
+  }
+
+  // Chips de color del filtro: "Todos" más la paleta. Un solo color activo a la vez.
+  function renderFilterColors() {
+    if (!ui.filterColors) return;
+    ui.filterColors.replaceChildren();
+
+    const allBtn = document.createElement('button');
+    allBtn.type = 'button';
+    allBtn.className = 'ytt-filter-all';
+    allBtn.textContent = I18n.t('filterAll');
+    allBtn.title = I18n.t('filterClear');
+    allBtn.setAttribute('aria-pressed', String(filterColor === ''));
+    allBtn.addEventListener('click', () => {
+      filterColor = '';
+      renderComments();
+    });
+    ui.filterColors.append(allBtn);
+
+    Common.COLORS.forEach((color) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'ytt-filter-dot';
+      btn.style.setProperty('--swatch', color.value);
+      btn.setAttribute('aria-pressed', String(filterColor === color.value));
+      btn.setAttribute('aria-label', I18n.colorLabel(color.value));
+      btn.title = I18n.colorLabel(color.value);
+      btn.addEventListener('click', () => {
+        filterColor = filterColor === color.value ? '' : color.value;
+        renderComments();
+      });
+      ui.filterColors.append(btn);
+    });
   }
 
   // Idioma activo: preferencia guardada ('auto' | 'es' | 'en').
@@ -322,8 +399,12 @@
     ui.saveText.textContent = I18n.t('saveMoment');
     ui.emptyText.textContent = I18n.t('emptyList');
     ui.footerNote.textContent = I18n.t('footerPrivate');
+    ui.searchInput.placeholder = I18n.t('searchPlaceholder');
+    ui.searchInput.setAttribute('aria-label', I18n.t('searchLabel'));
+    ui.filterColors.setAttribute('aria-label', I18n.t('filterColorsLabel'));
 
     renderColors();
+    renderFilterColors();
     renderComments();
     updateClock();
   }
@@ -552,16 +633,38 @@
     });
   }
 
+  // Refleja el filtro activo en los chips sin reconstruirlos (no se pierde el foco).
+  function syncFilterChips() {
+    if (!ui.filterColors) return;
+    const allBtn = ui.filterColors.querySelector('.ytt-filter-all');
+    if (allBtn) allBtn.setAttribute('aria-pressed', String(filterColor === ''));
+    ui.filterColors.querySelectorAll('.ytt-filter-dot').forEach((btn) => {
+      btn.setAttribute('aria-pressed', String(btn.style.getPropertyValue('--swatch') === filterColor));
+    });
+  }
+
   function renderComments() {
     if (!ui.list) return;
     comments.sort((a, b) => a.timestamp - b.timestamp);
+
+    const filtering = filterQuery !== '' || filterColor !== '';
+    const visible = Common.filterComments(comments, { query: filterQuery, color: filterColor });
+
     ui.list.replaceChildren();
-    ui.empty.hidden = comments.length > 0;
+    ui.empty.hidden = visible.length > 0;
+    ui.emptyText.textContent = filtering ? I18n.t('noMatches') : I18n.t('emptyList');
     ui.countBadge.textContent = comments.length === 1
       ? I18n.t('countOne', { count: comments.length })
       : I18n.t('countMany', { count: comments.length });
+    if (ui.filterInfo) {
+      ui.filterInfo.hidden = !filtering;
+      ui.filterInfo.textContent = filtering
+        ? I18n.t('shownOfTotal', { shown: visible.length, total: comments.length })
+        : '';
+    }
+    syncFilterChips();
 
-    comments.forEach((comment) => {
+    visible.forEach((comment) => {
       const item = document.createElement('article');
       item.className = 'ytt-item';
       item.style.setProperty('--item-color', comment.color);
@@ -646,6 +749,18 @@
     renderTimeline(duration);
   }
 
+  // Al cambiar de video no puede quedar visible ni un instante el listado anterior.
+  function resetVideoState() {
+    comments = [];
+    editingId = null;
+    if (ui.errorMsg) {
+      ui.errorMsg.hidden = true;
+      ui.errorMsg.textContent = '';
+    }
+    if (ui.textarea) ui.textarea.value = '';
+    renderComments();
+  }
+
   function updateClock() {
     if (!ui.currentTimeText) return;
     const video = getYouTubeVideoElement();
@@ -691,6 +806,7 @@
         hostEl.remove();
       }
       currentVideoId = null;
+      resetVideoState();
       return;
     }
 
@@ -715,7 +831,7 @@
 
     if (currentVideoId !== videoId) {
       currentVideoId = videoId;
-      editingId = null;
+      resetVideoState();
       if (ui.videoIdSpan) ui.videoIdSpan.textContent = videoId;
       Store.getComments(videoId).then((loaded) => {
         if (currentVideoId === videoId) {
@@ -744,6 +860,14 @@
     updateClock();
     ui.textarea.focus();
   }, true);
+
+  // YouTube avisa el arranque de la navegación interna: si el video destino es otro, el listado
+  // viejo se limpia en el acto. Se compara con la URL para no vaciar el panel cuando la navegación
+  // termina en el mismo video (ahí nadie volvería a cargar las notas).
+  document.addEventListener('yt-navigate-start', () => {
+    if (!hostEl || !hostEl.isConnected) return;
+    if (Common.extractVideoId(location.href) !== currentVideoId) resetVideoState();
+  });
 
   document.addEventListener('yt-navigate-finish', () => {
     setTimeout(ensureMounted, 150);

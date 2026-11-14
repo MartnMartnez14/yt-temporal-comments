@@ -40,6 +40,13 @@
       countOne: '{count} momento',
       countMany: '{count} momentos',
       footerPrivate: '⌑ Privado en tu navegador',
+      searchPlaceholder: 'Buscar en las notas de este video',
+      searchLabel: 'Buscar notas',
+      filterColorsLabel: 'Filtrar por color',
+      filterAll: 'Todos',
+      filterClear: 'Limpiar filtro',
+      noMatches: 'Ninguna nota coincide con el filtro.',
+      shownOfTotal: '{shown} de {total}',
 
       // Popup
       popupStatsLabel: 'Resumen de actividad',
@@ -61,6 +68,9 @@
       exportJson: 'Exportar JSON',
       importJson: 'Importar JSON',
       exportMarkdown: 'Exportar Markdown',
+      popupSearchPlaceholder: 'Buscar en todas las notas',
+      popupResultsTitle: 'Resultados',
+      popupNoMatches: 'No hay notas que coincidan.',
 
       // Estados del popup
       statusSyncOn: 'Sincronización activada.',
@@ -114,6 +124,13 @@
       countOne: '{count} moment',
       countMany: '{count} moments',
       footerPrivate: '⌑ Private in your browser',
+      searchPlaceholder: 'Search notes in this video',
+      searchLabel: 'Search notes',
+      filterColorsLabel: 'Filter by color',
+      filterAll: 'All',
+      filterClear: 'Clear filter',
+      noMatches: 'No notes match the filter.',
+      shownOfTotal: '{shown} of {total}',
 
       // Popup
       popupStatsLabel: 'Activity summary',
@@ -135,6 +152,9 @@
       exportJson: 'Export JSON',
       importJson: 'Import JSON',
       exportMarkdown: 'Export Markdown',
+      popupSearchPlaceholder: 'Search all notes',
+      popupResultsTitle: 'Results',
+      popupNoMatches: 'No notes match.',
 
       // Popup statuses
       statusSyncOn: 'Sync enabled.',

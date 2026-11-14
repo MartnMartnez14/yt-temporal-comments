@@ -668,3 +668,124 @@ test('store.js: getSettings guarda la preferencia de idioma y descarta valores i
   // La preferencia de idioma no pisa la de sincronización.
   assert.equal((await Store.getSettings()).syncEnabled, true);
 });
+
+test('common.js: filterComments filtra por texto sin acentos ni mayúsculas y por color', () => {
+  const list = [
+    { id: '1', text: 'Avanzar la práctica', color: '#f07159' },
+    { id: '2', text: 'práctica final', color: '#80c783' },
+    { id: '3', text: 'Otra cosa', color: '#80c783' },
+  ];
+
+  assert.equal(Common.filterComments(list, {}).length, 3);
+  assert.equal(Common.filterComments(list, { query: 'PRACTICA' }).length, 2);
+  assert.equal(Common.filterComments(list, { query: '  practica  ' }).length, 2);
+  assert.equal(Common.filterComments(list, { color: '#80C783' }).length, 2);
+  assert.equal(Common.filterComments(list, { query: 'practica', color: '#f07159' }).length, 1);
+  // Un filtro de sólo espacios no filtra nada.
+  assert.equal(Common.filterComments(list, { query: '   ' }).length, 3);
+  // Entradas inválidas devuelven lista vacía, nunca una excepción.
+  assert.equal(Common.filterComments(null, {}).length, 0);
+  assert.equal(Common.filterComments(undefined, { query: 'x' }).length, 0);
+  // No muta la lista original ni devuelve la misma referencia.
+  const copia = Common.filterComments(list, {});
+  assert.notEqual(copia, list);
+  assert.equal(list.length, 3);
+  assert.equal(Common.normalizeSearchText('Práctica'), 'practica');
+});
+
+test('store.js: searchComments busca por texto y color en todos los videos', async () => {
+  storageMock.reset();
+  const videoA = 'dQw4w9WgXcQ';
+  const videoB = '3JZ_D3ELwOQ';
+  const coral = Common.COLORS[0].value;
+  const verde = Common.COLORS[3].value;
+
+  await Store.saveComments(videoA, [
+    Common.createComment({ videoId: videoA, videoTitle: 'Video Alfa', timestamp: 90, text: 'Exportar notas', color: verde }),
+    Common.createComment({ videoId: videoA, videoTitle: 'Video Alfa', timestamp: 30, text: 'Cierre de cuenta', color: coral }),
+  ], { title: 'Video Alfa' });
+
+  await Store.saveComments(videoB, [
+    Common.createComment({ videoId: videoB, videoTitle: 'Video Beta', timestamp: 10, text: 'Cuenta de prueba', color: verde }),
+  ], { title: 'Video Beta' });
+
+  // Texto: dos coincidencias, ordenadas por título de video y después por instante.
+  const porTexto = await Store.searchComments({ query: 'CUENTA' });
+  assert.equal(porTexto.length, 2);
+  assert.deepEqual(porTexto.map((m) => m.videoId), [videoA, videoB]);
+  assert.equal(porTexto[0].videoTitle, 'Video Alfa');
+  assert.equal(porTexto[0].timestamp, 30);
+
+  // Color.
+  const porColor = await Store.searchComments({ color: verde });
+  assert.equal(porColor.length, 2);
+
+  // Texto y color a la vez.
+  const ambos = await Store.searchComments({ query: 'cuenta', color: coral });
+  assert.equal(ambos.length, 1);
+  assert.equal(ambos[0].text, 'Cierre de cuenta');
+
+  // Sin filtro devuelve todo; sin coincidencias, lista vacía.
+  assert.equal((await Store.searchComments({})).length, 3);
+  assert.equal((await Store.searchComments({ query: 'inexistente' })).length, 0);
+});
+
+test('content.js: buscador y filtro por color del listado', () => {
+  const source = fs.readFileSync(path.join(SRC_DIR, 'content', 'content.js'), 'utf8');
+  const css = fs.readFileSync(path.join(SRC_DIR, 'content', 'content.css'), 'utf8');
+
+  assert.match(source, /let filterQuery = ''/);
+  assert.match(source, /let filterColor = ''/);
+  assert.match(source, /Common\.filterComments\(comments, \{ query: filterQuery, color: filterColor \}\)/);
+  assert.match(source, /function renderFilterColors\(/);
+  assert.match(source, /className = 'ytt-search'/);
+  assert.match(source, /I18n\.t\('noMatches'\)/);
+  assert.match(source, /I18n\.t\('shownOfTotal'/);
+  assert.match(css, /\.ytt-filter-dot\s*\{/);
+  assert.match(css, /\.ytt-search\s*\{/);
+});
+
+test('content.js: la navegación SPA no deja datos del video anterior', () => {
+  const source = fs.readFileSync(path.join(SRC_DIR, 'content', 'content.js'), 'utf8');
+
+  assert.match(source, /function resetVideoState\(/);
+  assert.match(source, /document\.addEventListener\('yt-navigate-start'/);
+
+  // Al cambiar de video, el estado viejo se limpia antes de pedir las notas nuevas.
+  const bloque = source.slice(source.indexOf('if (currentVideoId !== videoId)'));
+  const limpia = bloque.indexOf('resetVideoState()');
+  const pide = bloque.indexOf('Store.getComments');
+  assert.ok(limpia !== -1 && pide !== -1, 'Falta el reset o la carga de notas');
+  assert.ok(limpia < pide, 'El listado viejo tiene que limpiarse antes de cargar el nuevo video');
+
+  // resetVideoState vacía el listado y el campo de nota.
+  const cuerpo = source.slice(source.indexOf('function resetVideoState()'), source.indexOf('function updateClock()'));
+  assert.match(cuerpo, /comments = \[\]/);
+  assert.match(cuerpo, /ui\.textarea\.value = ''/);
+  assert.match(cuerpo, /renderComments\(\)/);
+});
+
+test('popup: buscador de notas en todos los videos', () => {
+  const html = fs.readFileSync(path.join(SRC_DIR, 'popup', 'popup.html'), 'utf8');
+  const js = fs.readFileSync(path.join(SRC_DIR, 'popup', 'popup.js'), 'utf8');
+
+  assert.match(html, /id="search-input"/);
+  assert.match(html, /id="search-colors"/);
+  assert.match(js, /Store\.searchComments\(filters\)/);
+  assert.match(js, /filters\.color/);
+  assert.match(js, /note-row/);
+  // Cada resultado tiene que abrir el video en el instante de la nota.
+  assert.match(js, /watch\?v=\$\{encodeURIComponent\(match\.videoId\)\}&t=\$\{seconds\}s/);
+});
+
+test('popup: los errores de refresco no se tragan y safeRefresh no se llama a sí misma', () => {
+  const js = fs.readFileSync(path.join(SRC_DIR, 'popup', 'popup.js'), 'utf8');
+
+  // Nada de .catch(() => {}): si la lista no se puede actualizar tiene que quedar rastro.
+  assert.equal(/\.catch\(\(\) => \{\}\)/.test(js), false, 'Hay promesas con errores silenciados');
+
+  const inicio = js.indexOf('function safeRefresh()');
+  const cuerpo = js.slice(js.indexOf('{', inicio), js.indexOf('async function refreshList()'));
+  assert.match(cuerpo, /refreshList\(\)\.catch/, 'safeRefresh tiene que llamar a refreshList');
+  assert.equal(/safeRefresh\s*\(/.test(cuerpo), false, 'safeRefresh no puede llamarse a sí misma');
+});

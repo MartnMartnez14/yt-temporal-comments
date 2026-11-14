@@ -8,6 +8,15 @@ El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/
 ## [Sin publicar]
 
 ### Añadido
+- **Buscador y filtro por color**: el panel suma una caja de búsqueda sobre el listado y una fila
+  con "Todos" más los 10 colores; el popup busca en las notas de **todos** los videos
+  (`searchComments()` en `store.js`) y cada resultado abre YouTube en el segundo de la nota. El
+  filtro comparte `filterComments()` en `common.js` y no distingue mayúsculas ni acentos
+  ("practica" encuentra "Práctica"). Con filtro activo el panel muestra "N de M" y un estado vacío
+  propio.
+- **Navegación SPA robusta**: al cambiar de video el listado anterior se limpia en el acto
+  (`resetVideoState()`), antes de pedir las notas nuevas, y se escucha `yt-navigate-start` comparando
+  la URL para no vaciar el panel cuando la navegación termina en el mismo video.
 - **Bilingüe español/inglés con selector**: el popup suma un desplegable *Automático / Español /
   English* que se guarda en `chrome.storage` y cambia el panel, el popup y las fechas sin recargar
   la extensión (`chrome.storage.onChanged` repinta el panel). El diccionario vive en
@@ -38,7 +47,8 @@ El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/
 - Pruebas nuevas: índice por video (título, cantidad, `updatedAt`), `commentsToMarkdown()`,
   `exportAllToMarkdown()`, contrato de render del reloj, registro del atajo, reubicación del panel
   en modo cine y edición de notas, más las de idioma (mismas claves en ambos idiomas, fechas en
-  los dos, colores y ausencia de literales sueltos). Total: 25 de 25.
+  los dos, colores y ausencia de literales sueltos), el filtro compartido, la búsqueda en todos los
+  videos y el contrato de la navegación SPA. Total: 31 de 31.
 - `PUBLISHING.md`: proceso de publicación en la Chrome Web Store verificado contra la documentación
   oficial el 7/11/2026 (registro de desarrollador, tarifa única, 2SV, países admitidos, empaquetado,
   campos del dashboard, revisión, publicación diferida de 30 días y checklist final).
