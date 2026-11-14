@@ -152,6 +152,75 @@ body {
   cursor: pointer;
 }
 
+/* Pie de apoyo: una tarjeta compacta, fija abajo del popup. Con muchos videos la lista
+   empuja el contenido más allá de los 600 px que permite Chrome, así que el pie se queda
+   pegado al borde inferior para que el enlace siempre esté a la vista. */
+.support {
+  position: sticky;
+  bottom: 0;
+  margin-top: 12px;
+  padding: 10px 0 6px;
+  border-top: 1px solid var(--line);
+  background: var(--bg);
+  z-index: 2;
+}
+
+.support-card {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--panel);
+  text-decoration: none;
+  color: var(--text);
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.support-card:hover,
+.support-card:focus-visible {
+  background: #1d1e26;
+  border-color: #3a3c48;
+}
+
+.support-card:focus-visible {
+  outline: 2px solid var(--neon-cyan);
+  outline-offset: 1px;
+}
+
+.support-icon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: var(--grad);
+  font-size: 13px;
+  flex: none;
+}
+
+.support-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.support-body strong {
+  font-size: 12px;
+}
+
+.support-body small {
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.support-go {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .sync-note {
   margin: 6px 2px 0;
   font-size: 10.5px;

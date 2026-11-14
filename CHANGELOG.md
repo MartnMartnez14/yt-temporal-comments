@@ -8,6 +8,11 @@ El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/
 ## [Sin publicar]
 
 ### Añadido
+- **Pie de apoyo en el popup**: una tarjeta minimalista y bilingüe con Ko-fi ("Invitame un
+  cafecito · voluntario") al pie del popup, pegada al borde inferior con `position: sticky` porque
+  con varios videos el contenido supera los 600 px que permite Chrome. Sólo Ko-fi: no viajan datos
+  de cobro (Prex, Mercado Pago, teléfono ni correo) dentro del paquete, y una prueba falla si
+  aparecen.
 - **Control de cuota de Chrome Sync**: `saveComments()` decide si el video entra en
   `chrome.storage.sync` por ítem (8 KB) y por total (100 KB) y devuelve `{ saved, synced, reason }`;
   si no entra, borra la copia vieja de sync para no mostrar en otro equipo notas desactualizadas y
@@ -61,7 +66,7 @@ El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/
   en modo cine y edición de notas, más las de idioma (mismas claves en ambos idiomas, fechas en
   los dos, colores y ausencia de literales sueltos), el filtro compartido, la búsqueda en todos los
   videos, el contrato de la navegación SPA, la cuota de sync (por ítem y apagada) y la pantalla
-  completa. Total: 35 de 35.
+  completa, el pie de apoyo y la ausencia de datos de cobro en el paquete. Total: 37 de 37.
 - `PUBLISHING.md`: proceso de publicación en la Chrome Web Store verificado contra la documentación
   oficial el 7/11/2026 (registro de desarrollador, tarifa única, 2SV, países admitidos, empaquetado,
   campos del dashboard, revisión, publicación diferida de 30 días y checklist final).

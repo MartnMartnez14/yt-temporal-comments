@@ -881,3 +881,35 @@ test('popup: avisa cuando hay notas que no entran en Chrome Sync', () => {
   assert.match(js, /syncDisabledNote/);
   assert.match(css, /\.sync-note\s*\{/);
 });
+
+test('popup: pie de apoyo con Ko-fi, bilingüe y sin datos de cobro', () => {
+  const html = fs.readFileSync(path.join(SRC_DIR, 'popup', 'popup.html'), 'utf8');
+
+  assert.match(html, /<footer class="support"/);
+  assert.match(html, /href="https:\/\/ko-fi\.com\/martinmartinezgarcia"/);
+  // Un enlace externo siempre con target y rel.
+  assert.match(html, /target="_blank" rel="noopener noreferrer"/);
+  assert.match(html, /data-i18n-aria-label="supportTitle"/);
+  assert.match(html, /data-i18n="supportKofiSub"/);
+});
+
+test('seguridad: la extensión no lleva datos de cobro ni de contacto', () => {
+  const prohibidos = [
+    'Prex', 'Mercado Pago', 'PayPal', 'Starlink',
+    '+598', 'hotmail', 'gmail', '35502', '1006269736963', 'wa.me',
+  ];
+  const archivos = fs.readdirSync(SRC_DIR, { recursive: true })
+    .filter((rel) => typeof rel === 'string' && /\.(js|html|css|json)$/.test(rel))
+    .map((rel) => path.join(SRC_DIR, rel));
+
+  for (const file of archivos) {
+    const contenido = fs.readFileSync(file, 'utf8');
+    for (const dato of prohibidos) {
+      assert.equal(
+        contenido.toLowerCase().includes(dato.toLowerCase()),
+        false,
+        `${path.basename(file)} contiene un dato que no debe viajar en la extensión: ${dato}`
+      );
+    }
+  }
+});

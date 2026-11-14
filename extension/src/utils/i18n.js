@@ -52,6 +52,11 @@
       syncPendingMany: '{count} videos están sólo en este equipo',
       syncPendingHint: 'Superan el límite de Chrome Sync y se guardan sólo en local.',
 
+      // Pie de apoyo (sólo Ko-fi: no viajan datos de cobro dentro de la extensión)
+      supportTitle: 'Apoyar el proyecto',
+      supportKofiTitle: 'Ko-fi',
+      supportKofiSub: 'Invitame un cafecito · voluntario',
+
       // Popup
       popupStatsLabel: 'Resumen de actividad',
       statVideos: 'Videos con notas',
@@ -139,6 +144,11 @@
       syncPendingOne: '1 video is only on this device',
       syncPendingMany: '{count} videos are only on this device',
       syncPendingHint: 'They exceed the Chrome Sync limit and are saved only locally.',
+
+      // Support footer (Ko-fi only: no payment details ship inside the extension)
+      supportTitle: 'Support the project',
+      supportKofiTitle: 'Ko-fi',
+      supportKofiSub: 'Buy me a coffee · optional',
 
       // Popup
       popupStatsLabel: 'Activity summary',
