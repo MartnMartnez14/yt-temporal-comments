@@ -66,7 +66,8 @@ El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/
   en modo cine y edición de notas, más las de idioma (mismas claves en ambos idiomas, fechas en
   los dos, colores y ausencia de literales sueltos), el filtro compartido, la búsqueda en todos los
   videos, el contrato de la navegación SPA, la cuota de sync (por ítem y apagada) y la pantalla
-  completa, el pie de apoyo y la ausencia de datos de cobro en el paquete. Total: 37 de 37.
+  completa, el pie de apoyo, la ausencia de datos de cobro en el paquete, la sincronización entre
+  `content.css` y `styles.js` y el montaje sólo en `/watch`. Total: 40 de 40.
 - `PUBLISHING.md`: proceso de publicación en la Chrome Web Store verificado contra la documentación
   oficial el 7/11/2026 (registro de desarrollador, tarifa única, 2SV, países admitidos, empaquetado,
   campos del dashboard, revisión, publicación diferida de 30 días y checklist final).
@@ -76,6 +77,16 @@ El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/
 - `CHROME_STORE_CHECKLIST.md`: reescrito como verificación de cumplimiento, con las medidas
   correctas de los activos (capturas 1280×800 o 640×400, promocional 440×280, marquee 1400×560) y
   referencias a los dos documentos nuevos.
+
+### Corregido
+- **Error "Unsafe attempt to load URL ... Domains, protocols and ports must match"**: el panel pedía
+  `chrome-extension://…/content.css` con un `<link>`, y Chrome rechaza esa carga en Shorts y en
+  algunas vistas del reproductor. Ahora el CSS viaja como texto en `src/content/styles.js`
+  (generado desde `content.css` con `node tools/build-css.mjs`) y se inyecta con un `<style>` en el
+  Shadow DOM: no hay pedido, así que el error no puede volver. El manifiesto ya no declara
+  `web_accessible_resources`. Una prueba falla si `styles.js` queda desincronizado del CSS.
+- **Panel invisible en Shorts**: el panel se montaba en un `#below` de 0×0 (sin reproductor con
+  línea de tiempo). Ahora sólo se monta en `youtube.com/watch`.
 
 ### Cambiado
 - `README.md`: sección de apoyo reducida a una donación voluntaria por Ko-fi, con la aclaración de

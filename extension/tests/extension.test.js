@@ -124,11 +124,13 @@ test('manifest.json: validez MV3, permisos mínimos y archivos existentes', () =
     }
   }
 
-  for (const war of manifest.web_accessible_resources) {
-    for (const res of war.resources) {
-      assert.ok(fs.existsSync(path.join(EXTENSION_DIR, res)), `No existe recurso web accesible: ${res}`);
-    }
-  }
+  // Ya no hay recursos web accesibles: el CSS viaja como texto en styles.js. Si alguien vuelve a
+  // declararlos, es señal de que volvió la carga por chrome-extension:// que Chrome rechaza.
+  assert.equal(
+    manifest.web_accessible_resources,
+    undefined,
+    'No debe declarar web_accessible_resources'
+  );
 });
 
 test('common.js: formatTime formatea segundos y maneja bordes e inválidos', () => {
@@ -912,4 +914,50 @@ test('seguridad: la extensión no lleva datos de cobro ni de contacto', () => {
       );
     }
   }
+});
+
+test('content.css y styles.js están sincronizados', () => {
+  const cssPath = path.join(SRC_DIR, 'content', 'content.css');
+  const stylesPath = path.join(SRC_DIR, 'content', 'styles.js');
+
+  const css = fs.readFileSync(cssPath, 'utf8');
+  delete globalThis.YTTemporalStyles;
+  require(stylesPath);
+  const enJs = globalThis.YTTemporalStyles;
+
+  assert.equal(typeof enJs, 'string', 'styles.js tiene que exportar el CSS como texto');
+  assert.equal(
+    enJs,
+    css,
+    'styles.js está desactualizado: corré "node tools/build-css.mjs"'
+  );
+  assert.ok(enJs.includes(':host([data-layout=\'theater\'])'), 'El CSS generado tiene que ser el completo');
+});
+
+test('content.js: el CSS se inyecta como texto y no se pide ningún archivo de la extensión', () => {
+  const source = fs.readFileSync(path.join(SRC_DIR, 'content', 'content.js'), 'utf8');
+
+  // Esta carga es la que Chrome rechaza en Shorts y en algunas vistas del reproductor.
+  assert.equal(/chrome\.runtime\.getURL/.test(source), false, 'No debe pedir URLs chrome-extension://');
+  assert.equal(/createElement\('link'\)/.test(source), false, 'No debe crear <link> de estilos');
+
+  assert.match(source, /globalThis\.YTTemporalStyles/);
+  assert.match(source, /createElement\('style'\)/);
+
+  // styles.js tiene que cargarse antes del content script.
+  const manifest = JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf8'));
+  const scripts = manifest.content_scripts[0].js;
+  assert.ok(scripts.includes('src/content/styles.js'), 'Falta styles.js en content_scripts');
+  assert.ok(
+    scripts.indexOf('src/content/styles.js') < scripts.indexOf('src/content/content.js'),
+    'styles.js tiene que ir antes que content.js'
+  );
+});
+
+test('content.js: el panel sólo se monta en la página de reproducción', () => {
+  const source = fs.readFileSync(path.join(SRC_DIR, 'content', 'content.js'), 'utf8');
+  assert.match(source, /location\.pathname === '\/watch'/);
+  assert.match(source, /esPaginaDeReproduccion/);
+  // Sin esa guarda el panel se monta en Shorts dentro de un #below de 0x0, invisible.
+  assert.match(source, /if \(!videoId \|\| !esPaginaDeReproduccion\)/);
 });

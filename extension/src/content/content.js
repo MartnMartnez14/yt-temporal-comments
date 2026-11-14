@@ -90,12 +90,15 @@
   }
 
   function buildPanelDom(root) {
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL
-      ? chrome.runtime.getURL('src/content/content.css')
-      : 'src/content/content.css';
-    root.append(link);
+    // El CSS se inyecta como texto: pedirlo con chrome-extension:// obliga a declararlo en
+    // web_accessible_resources y Chrome rechaza esa carga en algunas vistas de YouTube
+    // ("Unsafe attempt to load URL ... Domains, protocols and ports must match").
+    const style = document.createElement('style');
+    style.textContent = (globalThis.YTTemporalStyles || '').replace(
+      /\/\*[\s\S]*?\*\//g,
+      '',
+    );
+    root.append(style);
 
     const panel = document.createElement('section');
     panel.className = 'ytt-panel';
@@ -808,7 +811,10 @@
 
   function ensureMounted() {
     const videoId = Common.extractVideoId(location.href);
-    if (!videoId) {
+    // El panel es para la página de reproducción. En Shorts y en embeds no hay reproductor con
+    // línea de tiempo propia: #below queda en 0x0 y el panel se montaría invisible.
+    const esPaginaDeReproduccion = location.pathname === '/watch';
+    if (!videoId || !esPaginaDeReproduccion) {
       if (hostEl && hostEl.isConnected) {
         hostEl.remove();
       }

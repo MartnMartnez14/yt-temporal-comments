@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "default_locale": "es",
   "name": "__MSG_appName__",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "description": "__MSG_appDesc__",
   "icons": {
     "16": "icons/icon16.png",
@@ -35,19 +35,10 @@
         "src/utils/common.js",
         "src/utils/i18n.js",
         "src/storage/store.js",
+        "src/content/styles.js",
         "src/content/content.js"
       ],
       "run_at": "document_idle"
-    }
-  ],
-  "web_accessible_resources": [
-    {
-      "resources": [
-        "src/content/content.css"
-      ],
-      "matches": [
-        "*://*.youtube.com/*"
-      ]
     }
   ]
 }
