@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>YT Temporal Comments</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <main class="popup-shell">
+    <header class="popup-header">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">▶</span>
+        <span>YT <strong>Temporal</strong></span>
+      </div>
+      <span class="version-pill" id="version-pill"></span>
+    </header>
+
+    <section class="stats-grid" aria-label="Resumen de actividad" data-i18n-aria-label="popupStatsLabel">
+      <div class="stat-card">
+        <span class="stat-value" id="stat-videos">0</span>
+        <span class="stat-label" data-i18n="statVideos">Videos con notas</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value" id="stat-comments">0</span>
+        <span class="stat-label" data-i18n="statComments">Momentos guardados</span>
+      </div>
+    </section>
+
+    <section class="sync-row" aria-label="Configuración de sincronización" data-i18n-aria-label="syncSectionLabel">
+      <div class="sync-info">
+        <label for="sync-toggle" class="sync-title" data-i18n="syncTitle">Sincronizar con Chrome Sync</label>
+        <span class="sync-sub" data-i18n="syncSub">Guarda copia en tu cuenta de Google</span>
+      </div>
+      <input type="checkbox" id="sync-toggle" class="sync-checkbox" checked>
+    </section>
+
+    <section class="sync-row" aria-label="Idioma de la interfaz" data-i18n-aria-label="languageSectionLabel">
+      <div class="sync-info">
+        <label for="language-select" class="sync-title" data-i18n="languageTitle">Idioma</label>
+        <span class="sync-sub" data-i18n="languageSub">Automático sigue al navegador</span>
+      </div>
+      <select id="language-select" class="language-select">
+        <option value="auto" data-i18n="languageAuto">Automático</option>
+        <option value="es" data-i18n="languageEs">Español</option>
+        <option value="en" data-i18n="languageEn">English</option>
+      </select>
+    </section>
+
+    <section class="videos-section" aria-label="Videos guardados" data-i18n-aria-label="videosSectionLabel">
+      <div class="section-head">
+        <h2 data-i18n="recentVideos">Tus videos recientes</h2>
+      </div>
+      <div class="videos-list" id="videos-list" aria-live="polite">
+        <p class="empty-msg" id="empty-msg" data-i18n="emptyVideos">Abrí cualquier video en YouTube para empezar a guardar momentos.</p>
+      </div>
+    </section>
+
+    <section class="backup-actions" aria-label="Respaldo de datos" data-i18n-aria-label="backupSectionLabel">
+      <button type="button" class="action-btn primary-btn" id="export-btn" data-i18n="exportJson">Exportar JSON</button>
+      <button type="button" class="action-btn secondary-btn" id="import-btn" data-i18n="importJson">Importar JSON</button>
+      <button type="button" class="action-btn secondary-btn" id="export-md-btn" data-i18n="exportMarkdown">Exportar Markdown</button>
+      <input type="file" id="import-file" accept=".json,application/json" hidden>
+    </section>
+
+    <p class="status-msg" id="status-msg" role="status" aria-live="polite" hidden></p>
+  </main>
+
+  <script src="../utils/common.js"></script>
+  <script src="../utils/i18n.js"></script>
+  <script src="../storage/store.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

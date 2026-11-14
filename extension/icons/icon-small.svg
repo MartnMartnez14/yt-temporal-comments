@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="YT Temporal Comments">
+  <!-- Fuente para 16px y 32px: radio y triángulo más grandes para que la forma
+       sobreviva al downsample. Los 48 y 128 salen de icon.svg. -->
+  <defs>
+    <linearGradient id="brand-small" x1="0" y1="0" x2="128" y2="44" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2ee6f6"/>
+      <stop offset="0.52" stop-color="#8b7bff"/>
+      <stop offset="1" stop-color="#ff6ad5"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="128" height="128" rx="26" ry="26" fill="url(#brand-small)"/>
+  <path d="M46 30 L46 98 L102 64 Z" fill="#0a0c14" stroke="#0a0c14" stroke-width="10" stroke-linejoin="round"/>
+</svg>

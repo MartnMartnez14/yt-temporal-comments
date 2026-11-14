@@ -1,0 +1,10 @@
+{
+  "appName": {
+    "message": "YT Temporal Comments",
+    "description": "Extension name shown in Chrome and in the store."
+  },
+  "appDesc": {
+    "message": "Save private notes with color markers at exact moments of YouTube videos and find them again on your own timeline.",
+    "description": "Short description for the Chrome Web Store."
+  }
+}

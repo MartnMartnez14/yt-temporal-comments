@@ -1,0 +1,20 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+preview.html
+.env
+.env.*
+!.env.example
+dist/
+build/
+*.zip
+*.crx
+*.pem
+.DS_Store
+demo/Captura*
+# Notas y planes locales de trabajo (no se publican)
+.hermes/
+STORE_ACCOUNT.md
+tutorial_oficial_developer_ext_chrome.txt
+
