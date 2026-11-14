@@ -37,6 +37,16 @@
   margin: 0;
 }
 
+/* Columna única (ventana angosta o comentarios colapsados): bajo el reproductor, sin desbordar. */
+:host([data-layout='below']) {
+  margin: 0 0 16px;
+  max-width: 1100px;
+}
+
+:host([data-layout='below']) .ytt-panel {
+  margin: 0;
+}
+
 .ytt-panel {
   background:
     repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.014) 0 1px, transparent 1px 3px),

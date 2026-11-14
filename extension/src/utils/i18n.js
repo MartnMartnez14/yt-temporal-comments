@@ -47,6 +47,10 @@
       filterClear: 'Limpiar filtro',
       noMatches: 'Ninguna nota coincide con el filtro.',
       shownOfTotal: '{shown} de {total}',
+      syncDisabledNote: 'Sincronización desactivada: las notas quedan sólo en este equipo.',
+      syncPendingOne: '1 video está sólo en este equipo',
+      syncPendingMany: '{count} videos están sólo en este equipo',
+      syncPendingHint: 'Superan el límite de Chrome Sync y se guardan sólo en local.',
 
       // Popup
       popupStatsLabel: 'Resumen de actividad',
@@ -131,6 +135,10 @@
       filterClear: 'Clear filter',
       noMatches: 'No notes match the filter.',
       shownOfTotal: '{shown} of {total}',
+      syncDisabledNote: 'Sync disabled: notes stay only on this device.',
+      syncPendingOne: '1 video is only on this device',
+      syncPendingMany: '{count} videos are only on this device',
+      syncPendingHint: 'They exceed the Chrome Sync limit and are saved only locally.',
 
       // Popup
       popupStatsLabel: 'Activity summary',

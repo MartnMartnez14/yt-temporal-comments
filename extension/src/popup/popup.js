@@ -11,6 +11,7 @@
     versionPill: document.getElementById('version-pill'),
     syncToggle: document.getElementById('sync-toggle'),
     languageSelect: document.getElementById('language-select'),
+    syncNote: document.getElementById('sync-note'),
     searchInput: document.getElementById('search-input'),
     searchColors: document.getElementById('search-colors'),
     listTitle: document.getElementById('list-title'),
@@ -68,6 +69,9 @@
     if (els.languageSelect) els.languageSelect.value = I18n.normalizePreference(preference);
     renderStatus();
     renderSearchColors();
+    Store.getSyncReport()
+      .then(renderSyncNote)
+      .catch((err) => console.error('[YTTemporal] no se pudo leer el estado de sincronización', err));
     safeRefresh();
   }
 
@@ -75,12 +79,14 @@
     if (els.listTitle) els.listTitle.textContent = I18n.t('recentVideos');
     els.emptyMsg.textContent = I18n.t('emptyVideos');
 
-    const [settings, summaries] = await Promise.all([
+    const [settings, summaries, syncReport] = await Promise.all([
       Store.getSettings(),
       Store.getAllVideosSummary(),
+      Store.getSyncReport(),
     ]);
 
     els.syncToggle.checked = Boolean(settings.syncEnabled);
+    renderSyncNote(syncReport);
 
     const totalVideos = summaries.length;
     const totalComments = summaries.reduce((acc, item) => acc + item.count, 0);
@@ -115,6 +121,32 @@
       link.append(titleSpan, countSpan);
       els.videosList.append(link);
     });
+  }
+
+  // Avisa cuando hay notas que no entran en Chrome Sync y quedan sólo en este equipo.
+  function renderSyncNote(report) {
+    if (!els.syncNote) return;
+    els.syncNote.replaceChildren();
+
+    if (!report.enabled) {
+      els.syncNote.textContent = I18n.t('syncDisabledNote');
+      els.syncNote.hidden = false;
+      return;
+    }
+
+    if (report.pending.length === 0) {
+      els.syncNote.hidden = true;
+      return;
+    }
+
+    const title = report.pending.length === 1
+      ? I18n.t('syncPendingOne')
+      : I18n.t('syncPendingMany', { count: report.pending.length });
+    const hint = document.createElement('small');
+    hint.textContent = I18n.t('syncPendingHint');
+    els.syncNote.textContent = title;
+    els.syncNote.append(hint);
+    els.syncNote.hidden = false;
   }
 
   // Chips de color del popup: "Todos" más la paleta de marcadores.

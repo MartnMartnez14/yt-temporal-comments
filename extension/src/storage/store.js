@@ -2,7 +2,12 @@
   'use strict';
 
   const Common = globalThis.YTTemporalCommon;
-  const SYNC_ITEM_SOFT_LIMIT = 7500; // Margen seguro bajo QUOTA_BYTES_PER_ITEM (8192 bytes)
+  // Límites reales de chrome.storage.sync: QUOTA_BYTES_PER_ITEM (8192) y QUOTA_BYTES (102400).
+  // Se trabaja con margen para no quedar justo en el borde.
+  const SYNC_ITEM_LIMIT = 8192;
+  const SYNC_TOTAL_LIMIT = 102400;
+  const SYNC_ITEM_SOFT_LIMIT = 7500;
+  const SYNC_TOTAL_SOFT_LIMIT = 95000;
 
   function hasChromeStorage() {
     return typeof chrome !== 'undefined' && Boolean(chrome.storage && chrome.storage.local);
@@ -10,6 +15,20 @@
 
   function storageKey(videoId) {
     return `${Common.STORAGE_PREFIX}${videoId}`;
+  }
+
+  // Cuando no hay chrome.storage (páginas abiertas a mano, pruebas en el navegador) se usa
+  // localStorage, pero con el área en la clave: local y sync son espacios distintos en Chrome y
+  // mezclarlos hacía que escribir en sync pisara la copia local.
+  const FALLBACK_PREFIX = 'ytt-fallback:';
+
+  function fallbackKey(area, key) {
+    return `${FALLBACK_PREFIX}${area}:${key}`;
+  }
+
+  function fromFallback(area, k) {
+    const prefix = fallbackKey(area, '');
+    return k.startsWith(prefix) ? k.slice(prefix.length) : null;
   }
 
   async function rawGet(area, keys) {
@@ -28,13 +47,13 @@
       if (keys === null) {
         const all = {};
         for (let i = 0; i < localStorage.length; i += 1) {
-          const k = localStorage.key(i);
-          if (k) {
-            try {
-              all[k] = JSON.parse(localStorage.getItem(k));
-            } catch {
-              all[k] = localStorage.getItem(k);
-            }
+          const stored = localStorage.key(i);
+          const k = stored ? fromFallback(area, stored) : null;
+          if (!k) continue;
+          try {
+            all[k] = JSON.parse(localStorage.getItem(stored));
+          } catch {
+            all[k] = localStorage.getItem(stored);
           }
         }
         return all;
@@ -42,7 +61,7 @@
       const keyList = Array.isArray(keys) ? keys : [keys];
       const out = {};
       for (const k of keyList) {
-        const raw = localStorage.getItem(k);
+        const raw = localStorage.getItem(fallbackKey(area, k));
         if (raw !== null) {
           try {
             out[k] = JSON.parse(raw);
@@ -67,7 +86,7 @@
     }
     try {
       for (const [k, v] of Object.entries(items)) {
-        localStorage.setItem(k, JSON.stringify(v));
+        localStorage.setItem(fallbackKey(area, k), JSON.stringify(v));
       }
       return true;
     } catch {
@@ -85,7 +104,7 @@
     }
     try {
       const list = Array.isArray(keys) ? keys : [keys];
-      for (const k of list) localStorage.removeItem(k);
+      for (const k of list) localStorage.removeItem(fallbackKey(area, k));
       return true;
     } catch {
       return false;
@@ -158,8 +177,25 @@
     return [];
   }
 
+  // Bytes que ocupa una entrada, contando la clave y el JSON, como los mide Chrome.
+  function entryBytes(key, value) {
+    return JSON.stringify({ [key]: value }).length;
+  }
+
+  // Bytes ya usados en sync, sin contar la clave que se está por escribir.
+  function syncBytesExcluding(syncData, key) {
+    let total = 0;
+    for (const [k, v] of Object.entries(syncData)) {
+      if (!k.startsWith(Common.STORAGE_PREFIX) || k === key) continue;
+      total += entryBytes(k, v);
+    }
+    return total;
+  }
+
+  // Guarda siempre en local; sincroniza sólo si entraría en la cuota de Chrome Sync.
+  // Devuelve { saved, synced, reason, bytes } con reason: null | 'disabled' | 'item' | 'total' | 'error'.
   async function saveComments(videoId, comments, videoMeta = {}) {
-    if (!videoId) return false;
+    if (!videoId) return { saved: false, synced: false, reason: 'error', bytes: 0 };
     const key = storageKey(videoId);
     const clean = Common.validateCommentsArray(comments, videoId);
 
@@ -167,20 +203,83 @@
       await rawRemove('local', key);
       await rawRemove('sync', key);
       await updateIndexEntry(videoId, []);
-      return true;
+      return { saved: true, synced: true, reason: null, bytes: 0 };
     }
 
     const savedLocal = await rawSet('local', { [key]: clean });
     await updateIndexEntry(videoId, clean, videoMeta.title || '');
+    const bytes = entryBytes(key, clean);
 
     const settings = await getSettings();
-    if (settings.syncEnabled) {
-      const serialized = JSON.stringify({ [key]: clean });
-      if (serialized.length <= SYNC_ITEM_SOFT_LIMIT) {
-        await rawSet('sync', { [key]: clean });
-      }
+    if (!settings.syncEnabled) {
+      return { saved: savedLocal, synced: false, reason: 'disabled', bytes };
     }
-    return savedLocal;
+
+    // Fuera de Sync queda sólo en este equipo. Si había una versión vieja sincronizada se borra,
+    // porque mostrarla en otro dispositivo sería peor que no mostrar nada.
+    if (bytes > SYNC_ITEM_SOFT_LIMIT) {
+      await rawRemove('sync', key);
+      return { saved: savedLocal, synced: false, reason: 'item', bytes };
+    }
+
+    const syncData = await rawGet('sync', null);
+    if (syncBytesExcluding(syncData, key) + bytes > SYNC_TOTAL_SOFT_LIMIT) {
+      await rawRemove('sync', key);
+      return { saved: savedLocal, synced: false, reason: 'total', bytes };
+    }
+
+    const synced = await rawSet('sync', { [key]: clean });
+    return { saved: savedLocal, synced, reason: synced ? null : 'error', bytes };
+  }
+
+  // Dos listas son la misma copia si tienen las mismas notas, en el mismo orden y con el mismo
+  // texto y color; comparar sólo la clave diría que está sincronizado aunque la copia sea vieja.
+  function sameComments(a, b) {
+    if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
+    return a.every((item, index) => (
+      item && b[index]
+      && item.id === b[index].id
+      && item.text === b[index].text
+      && item.color === b[index].color
+    ));
+  }
+
+  // Estado de la sincronización: qué videos están sólo en local y cuánto ocupa el conjunto.
+  async function getSyncReport() {
+    const settings = await getSettings();
+    const localData = await rawGet('local', null);
+    const syncData = await rawGet('sync', null);
+
+    const items = [];
+    const pending = [];
+    for (const [key, value] of Object.entries(localData)) {
+      if (!key.startsWith(Common.STORAGE_PREFIX)) continue;
+      const videoId = key.slice(Common.STORAGE_PREFIX.length);
+      if (!/[\w-]{11}/.test(videoId)) continue;
+      const bytes = entryBytes(key, value);
+      const synced = Object.prototype.hasOwnProperty.call(syncData, key)
+        && sameComments(value, syncData[key]);
+      const item = { videoId, bytes, synced };
+      items.push(item);
+      if (!synced) pending.push(item);
+    }
+
+    let totalBytes = 0;
+    for (const [key, value] of Object.entries(syncData)) {
+      if (!key.startsWith(Common.STORAGE_PREFIX)) continue;
+      totalBytes += entryBytes(key, value);
+    }
+
+    return {
+      enabled: settings.syncEnabled,
+      items,
+      pending,
+      totalBytes,
+      itemLimit: SYNC_ITEM_SOFT_LIMIT,
+      totalLimit: SYNC_TOTAL_SOFT_LIMIT,
+      hardItemLimit: SYNC_ITEM_LIMIT,
+      hardTotalLimit: SYNC_TOTAL_LIMIT,
+    };
   }
 
   async function getAllVideosSummary() {
@@ -338,6 +437,7 @@
     saveSettings,
     getComments,
     saveComments,
+    getSyncReport,
     getAllVideosSummary,
     exportAllToJson,
     exportAllToMarkdown,

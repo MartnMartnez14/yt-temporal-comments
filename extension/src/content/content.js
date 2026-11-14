@@ -58,9 +58,10 @@
     if (secondary && secondary.offsetParent !== null) {
       return { parent: secondary, layout: 'default', position: 'prepend' };
     }
+    // Sin columna lateral (ventana angosta o comentarios colapsados): va bajo el reproductor.
     const below = document.querySelector('#below');
     if (below) {
-      return { parent: below, layout: 'default', position: 'prepend' };
+      return { parent: below, layout: 'below', position: 'prepend' };
     }
     return null;
   }
@@ -799,6 +800,12 @@
     updateClock();
   }
 
+  // En pantalla completa YouTube ocupa toda la ventana: el panel se oculta y vuelve al salir.
+  function syncFullscreenVisibility() {
+    if (!hostEl) return;
+    hostEl.style.display = document.fullscreenElement ? 'none' : '';
+  }
+
   function ensureMounted() {
     const videoId = Common.extractVideoId(location.href);
     if (!videoId) {
@@ -820,6 +827,8 @@
       buildPanelDom(shadowRoot);
       applyLanguage(languagePreference);
     }
+
+    syncFullscreenVisibility();
 
     // Cambiar de modo (predeterminado ↔ cine) mueve el panel a otro contenedor.
     if (hostEl.parentElement !== mount.parent || hostEl.dataset.layout !== mount.layout) {
@@ -868,6 +877,9 @@
     if (!hostEl || !hostEl.isConnected) return;
     if (Common.extractVideoId(location.href) !== currentVideoId) resetVideoState();
   });
+
+  document.addEventListener('fullscreenchange', syncFullscreenVisibility);
+  document.addEventListener('webkitfullscreenchange', syncFullscreenVisibility);
 
   document.addEventListener('yt-navigate-finish', () => {
     setTimeout(ensureMounted, 150);

@@ -8,6 +8,18 @@ El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/
 ## [Sin publicar]
 
 ### Añadido
+- **Control de cuota de Chrome Sync**: `saveComments()` decide si el video entra en
+  `chrome.storage.sync` por ítem (8 KB) y por total (100 KB) y devuelve `{ saved, synced, reason }`;
+  si no entra, borra la copia vieja de sync para no mostrar en otro equipo notas desactualizadas y
+  lo deja sólo en local. `getSyncReport()` informa qué videos están pendientes y cuánto ocupa el
+  conjunto, y el popup lo avisa: "1 video está sólo en este equipo / superan el límite de Chrome
+  Sync". El fallback a `localStorage` (sólo cuando no hay `chrome.storage`) ahora separa las áreas
+  `local` y `sync` en sus claves, porque antes escribir en sync pisaba la copia local.
+- **Pantalla completa**: al entrar en pantalla completa el panel se oculta y vuelve al salir
+  (`fullscreenchange`), en vez de quedar tapando el video. Se reevalúa al montar, porque el panel
+  puede montarse ya en pantalla completa.
+- **Columna única**: cuando no hay columna lateral (ventana angosta o comentarios colapsados) el
+  host queda con `data-layout="below"` y estilos propios de ancho y márgenes.
 - **Buscador y filtro por color**: el panel suma una caja de búsqueda sobre el listado y una fila
   con "Todos" más los 10 colores; el popup busca en las notas de **todos** los videos
   (`searchComments()` en `store.js`) y cada resultado abre YouTube en el segundo de la nota. El
@@ -48,7 +60,8 @@ El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/
   `exportAllToMarkdown()`, contrato de render del reloj, registro del atajo, reubicación del panel
   en modo cine y edición de notas, más las de idioma (mismas claves en ambos idiomas, fechas en
   los dos, colores y ausencia de literales sueltos), el filtro compartido, la búsqueda en todos los
-  videos y el contrato de la navegación SPA. Total: 31 de 31.
+  videos, el contrato de la navegación SPA, la cuota de sync (por ítem y apagada) y la pantalla
+  completa. Total: 35 de 35.
 - `PUBLISHING.md`: proceso de publicación en la Chrome Web Store verificado contra la documentación
   oficial el 7/11/2026 (registro de desarrollador, tarifa única, 2SV, países admitidos, empaquetado,
   campos del dashboard, revisión, publicación diferida de 30 días y checklist final).

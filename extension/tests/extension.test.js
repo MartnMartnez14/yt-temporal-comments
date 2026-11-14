@@ -310,7 +310,9 @@ test('store.js: guardado, lectura, índice de videos, exportAllToJson e importFr
   });
 
   const saved = await Store.saveComments(videoA, [c1, c2], { title: 'Video Alfa' });
-  assert.equal(saved, true);
+  assert.equal(saved.saved, true);
+  assert.equal(saved.synced, true);
+  assert.equal(saved.reason, null);
 
   // Debe devolverlos ordenados por timestamp ascendente
   const loadedA = await Store.getComments(videoA);
@@ -788,4 +790,94 @@ test('popup: los errores de refresco no se tragan y safeRefresh no se llama a s�
   const cuerpo = js.slice(js.indexOf('{', inicio), js.indexOf('async function refreshList()'));
   assert.match(cuerpo, /refreshList\(\)\.catch/, 'safeRefresh tiene que llamar a refreshList');
   assert.equal(/safeRefresh\s*\(/.test(cuerpo), false, 'safeRefresh no puede llamarse a sí misma');
+});
+
+test('store.js: las notas que no entran en Chrome Sync se guardan sólo en local', async () => {
+  storageMock.reset();
+  const videoId = 'dQw4w9WgXcQ';
+
+  const chica = await Store.saveComments(videoId, [
+    Common.createComment({ videoId, timestamp: 10, text: 'Nota corta', color: Common.COLORS[0].value }),
+  ], { title: 'Video de prueba' });
+  assert.equal(chica.synced, true);
+  assert.equal(chica.reason, null);
+  assert.ok(chica.bytes > 0);
+
+  // Veinte notas de 500 caracteres superan el límite por ítem: quedan en local y se informa el motivo.
+  const largas = Array.from({ length: 20 }, (_, i) => Common.createComment({
+    videoId,
+    timestamp: i * 5,
+    text: 'x'.repeat(Common.MAX_COMMENT_LENGTH),
+    color: Common.COLORS[i % Common.COLORS.length].value,
+  }));
+  const grande = await Store.saveComments(videoId, largas, { title: 'Video de prueba' });
+  assert.equal(grande.saved, true, 'Siempre se guarda en local');
+  assert.equal(grande.synced, false);
+  assert.equal(grande.reason, 'item');
+  assert.ok(grande.bytes > 7500, `Esperaba más de 7500 bytes, fueron ${grande.bytes}`);
+
+  // Nada se perdió: las 20 notas se leen igual.
+  assert.equal((await Store.getComments(videoId)).length, 20);
+
+  const report = await Store.getSyncReport();
+  assert.equal(report.enabled, true);
+  assert.equal(report.pending.length, 1);
+  assert.equal(report.pending[0].videoId, videoId);
+  assert.equal(report.totalBytes, 0);
+  assert.equal(report.itemLimit, 7500);
+  assert.equal(report.hardItemLimit, 8192);
+  assert.equal(report.hardTotalLimit, 102400);
+});
+
+test('store.js: con la sincronización apagada no se escribe nada en sync', async () => {
+  storageMock.reset();
+  const videoId = '3JZ_D3ELwOQ';
+  await Store.saveSettings({ syncEnabled: false });
+
+  const result = await Store.saveComments(videoId, [
+    Common.createComment({ videoId, timestamp: 5, text: 'Sólo local', color: Common.COLORS[1].value }),
+  ], { title: 'Otro video' });
+
+  assert.equal(result.saved, true);
+  assert.equal(result.synced, false);
+  assert.equal(result.reason, 'disabled');
+
+  const report = await Store.getSyncReport();
+  assert.equal(report.enabled, false);
+  assert.equal(report.pending.length, 1);
+  assert.equal(report.totalBytes, 0);
+
+  // Al reactivarla y volver a guardar ese video, se sincroniza y deja de estar pendiente.
+  await Store.saveSettings({ syncEnabled: true });
+  await Store.saveComments(videoId, [
+    Common.createComment({ videoId, timestamp: 5, text: 'Sólo local', color: Common.COLORS[1].value }),
+  ], { title: 'Otro video' });
+  assert.equal((await Store.getSyncReport()).pending.length, 0);
+});
+
+test('content.js: pantalla completa oculta el panel y lo devuelve al salir', () => {
+  const source = fs.readFileSync(path.join(SRC_DIR, 'content', 'content.js'), 'utf8');
+  const css = fs.readFileSync(path.join(SRC_DIR, 'content', 'content.css'), 'utf8');
+
+  assert.match(source, /function syncFullscreenVisibility\(/);
+  assert.match(source, /document\.fullscreenElement/);
+  assert.match(source, /addEventListener\('fullscreenchange'/);
+  assert.match(source, /syncFullscreenVisibility\(\);\s*\n\s*\/\/ Cambiar de modo/);
+
+  assert.match(source, /layout: 'below'/);
+  assert.match(css, /:host\(\[data-layout='below'\]\)\s*\{/);
+  assert.match(css, /:host\(\[data-layout='below'\]\)\s*\.ytt-panel\s*\{/);
+});
+
+test('popup: avisa cuando hay notas que no entran en Chrome Sync', () => {
+  const html = fs.readFileSync(path.join(SRC_DIR, 'popup', 'popup.html'), 'utf8');
+  const js = fs.readFileSync(path.join(SRC_DIR, 'popup', 'popup.js'), 'utf8');
+  const css = fs.readFileSync(path.join(SRC_DIR, 'popup', 'popup.css'), 'utf8');
+
+  assert.match(html, /id="sync-note"/);
+  assert.match(js, /Store\.getSyncReport\(\)/);
+  assert.match(js, /function renderSyncNote\(/);
+  assert.match(js, /syncPendingMany', \{ count: report\.pending\.length \}\)/);
+  assert.match(js, /syncDisabledNote/);
+  assert.match(css, /\.sync-note\s*\{/);
 });
