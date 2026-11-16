@@ -5,7 +5,7 @@
   --panel-2: #1b1c24;
   --line: #2a2c36;
   --text: #f1f0ed;
-  --muted: #8a8b95;
+  --muted: #9496a1;
   /* Misma paleta cyberpunk que el panel: neón, fuera de los colores de marcador. */
   --neon-cyan: #2ee6f6;
   --neon-violet: #8b7bff;
@@ -479,4 +479,15 @@ body {
   color: #e8e7e4;
   font-size: 11px;
   text-align: center;
+}
+
+/* Foco visible por teclado (WCAG 2.2 AA) */
+.sync-checkbox:focus-visible,
+.search-all:focus-visible,
+.search-dot:focus-visible,
+.video-row:focus-visible,
+.note-row:focus-visible,
+.action-btn:focus-visible {
+  outline: 2px solid var(--neon-cyan);
+  outline-offset: 2px;
 }

@@ -1,6 +1,6 @@
 # Política de Privacidad / Privacy Policy — YT Temporal Comments
 
-**Última actualización / Last updated:** 27 de octubre de 2026
+**Última actualización / Last updated:** 14 de noviembre de 2026
 
 ---
 
@@ -11,7 +11,7 @@
 
 ### 2. Datos que maneja la extensión
 - **Notas y marcadores temporales:** El texto de la nota, el color elegido, el segundo del video (`timestamp`) y el identificador público del video de YouTube (`videoId`).
-- **Preferencias de configuración:** Si el usuario activa o desactiva la sincronización con su navegador.
+- **Preferencias de configuración:** Si el usuario activa o desactiva la sincronización con su navegador y la preferencia de idioma de la interfaz (`auto`, `es` o `en`).
 
 ### 3. Dónde y cómo se almacenan los datos
 - **Almacenamiento local (`chrome.storage.local`):** Todos los datos se guardan directamente en el navegador del dispositivo del usuario.
@@ -38,7 +38,7 @@ Para dudas o consultas sobre esta política de privacidad, podés abrir un issue
 
 ### 2. Data Handled by the Extension
 - **Time-stamped notes and markers:** The note text, selected color, video timestamp, and the public YouTube `videoId`.
-- **User settings:** Preferences such as enabling or disabling Chrome storage synchronization.
+- **User settings:** Preferences such as enabling or disabling Chrome storage synchronization and the selected interface language (`auto`, `es`, or `en`).
 
 ### 3. Data Storage
 - **Local Storage (`chrome.storage.local`):** All notes are stored locally on the user's device.

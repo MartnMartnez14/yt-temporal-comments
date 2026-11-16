@@ -10,7 +10,7 @@
   --panel-2: #1b1c24;
   --line: #2a2c36;
   --text: #f1f0ed;
-  --muted: #8a8b95;
+  --muted: #9496a1;
   /* Paleta cyberpunk: neón saturado, deliberadamente lejos de los 10 pasteles de marcador. */
   --neon-cyan: #2ee6f6;
   --neon-violet: #8b7bff;
@@ -164,7 +164,7 @@
   display: flex;
   justify-content: space-between;
   font: 9px var(--mono);
-  color: #7c7d86;
+  color: #9496a1;
   margin-bottom: 10px;
 }
 
@@ -253,7 +253,7 @@
 
 .ytt-capture-caption {
   font: 10px var(--font);
-  color: #82838c;
+  color: #9496a1;
 }
 
 .ytt-capture-btn {
@@ -294,7 +294,7 @@
 }
 
 .ytt-textarea::placeholder {
-  color: #70717b;
+  color: #8e909b;
 }
 
 .ytt-color-label {
@@ -392,7 +392,7 @@
   align-items: center;
   gap: 10px;
   padding: 13px 4px 6px;
-  color: #7c7d86;
+  color: #9496a1;
   font-size: 11px;
   line-height: 1.45;
 }
@@ -492,7 +492,7 @@
   border: 0;
   border-radius: 5px;
   background: transparent;
-  color: #7c7d86;
+  color: #9496a1;
   cursor: pointer;
   font-size: 14px;
 }
@@ -505,7 +505,7 @@
   border: 0;
   border-radius: 5px;
   background: transparent;
-  color: #7c7d86;
+  color: #9496a1;
   cursor: pointer;
   font-size: 12px;
 }
@@ -600,7 +600,7 @@
 }
 
 .ytt-search::placeholder {
-  color: #70717b;
+  color: #8e909b;
 }
 
 .ytt-search:focus {
@@ -656,7 +656,7 @@
 .ytt-filter-info {
   margin: 6px 0 0;
   font: 9px var(--mono);
-  color: #85868f;
+  color: #9496a1;
 }
 
 .ytt-footer {
@@ -666,6 +666,21 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: #74757d;
+  color: #9496a1;
   font-size: 10px;
+}
+
+/* Foco visible por teclado (WCAG 2.2 AA) */
+.ytt-toggle-btn:focus-visible,
+.ytt-capture-btn:focus-visible,
+.ytt-color-choice:focus-visible,
+.ytt-save-btn:focus-visible,
+.ytt-item-time:focus-visible,
+.ytt-delete-btn:focus-visible,
+.ytt-edit-btn:focus-visible,
+.ytt-mini-btn:focus-visible,
+.ytt-filter-all:focus-visible,
+.ytt-filter-dot:focus-visible {
+  outline: 2px solid var(--neon-cyan);
+  outline-offset: 2px;
 }

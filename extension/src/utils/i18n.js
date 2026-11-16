@@ -16,6 +16,7 @@
       // Panel dentro de YouTube
       panelToggle: 'Colapsar o expandir panel',
       timelineLabel: 'Marcadores de comentarios',
+      captureCaption: 'instante actual',
       captureTitle: 'Actualizar al segundo actual',
       notePlaceholder: '¿Qué querés recordar de este momento?',
       noteLabel: 'Escribí tu nota temporal',
@@ -109,6 +110,7 @@
       // Panel inside YouTube
       panelToggle: 'Collapse or expand panel',
       timelineLabel: 'Comment markers',
+      captureCaption: 'current moment',
       captureTitle: 'Refresh to the current second',
       notePlaceholder: 'What do you want to remember from this moment?',
       noteLabel: 'Write your timestamped note',

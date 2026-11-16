@@ -5,9 +5,20 @@ El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/
 
 ---
 
-## [Sin publicar]
+## [1.0.0] - 2026-11-14
 
 ### Añadido
+- **Accesibilidad WCAG 2.2 AA y seguridad defensiva**: estilos `:focus-visible` en todos los
+  controles interactivos del panel y del popup, atributo `aria-expanded` en el botón de colapsar el
+  panel, navegación con flechas (`←` / `→`) en los marcadores de la línea de tiempo y en la paleta
+  de colores del editor en línea, ajuste de contraste en textos secundarios (≥ 4,5:1), traducción en
+  vivo de la etiqueta `"instante actual"` / `"current moment"` (`captureCaption`) y validación
+  defensiva `isValidVideoId()` contra claves de prototipo (`constructor`, `__proto__`) al importar
+  respaldos JSON. Total de pruebas automatizadas: 42 de 42 en verde.
+- **Activos gráficos listos para la Chrome Web Store (`store-assets/`)**: icono de tienda `128×128`
+  con arte centrado en `96×96` (`store-icon-128.png`), imagen promocional pequeña `440×280` RGB sin
+  transparencia (`promo-small.png`) y las 5 capturas `1280×800` RGB de la extensión en
+  funcionamiento (`store-assets/screenshots/`).
 - **Pie de apoyo en el popup**: una tarjeta minimalista y bilingüe con Ko-fi ("Invitame un
   cafecito · voluntario") al pie del popup, pegada al borde inferior con `position: sticky` porque
   con varios videos el contenido supera los 600 px que permite Chrome. Sólo Ko-fi: no viajan datos
@@ -67,7 +78,8 @@ El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/
   los dos, colores y ausencia de literales sueltos), el filtro compartido, la búsqueda en todos los
   videos, el contrato de la navegación SPA, la cuota de sync (por ítem y apagada) y la pantalla
   completa, el pie de apoyo, la ausencia de datos de cobro en el paquete, la sincronización entre
-  `content.css` y `styles.js` y el montaje sólo en `/watch`. Total: 40 de 40.
+  `content.css` y `styles.js`, el montaje sólo en `/watch`, la accesibilidad WCAG 2.2 AA y la
+  validación defensiva al importar JSON. Total: 42 de 42.
 - `PUBLISHING.md`: proceso de publicación en la Chrome Web Store verificado contra la documentación
   oficial el 7/11/2026 (registro de desarrollador, tarifa única, 2SV, países admitidos, empaquetado,
   campos del dashboard, revisión, publicación diferida de 30 días y checklist final).

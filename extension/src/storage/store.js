@@ -139,11 +139,13 @@
   }
 
   async function updateIndexEntry(videoId, comments, videoTitle = '') {
+    if (!Common.isValidVideoId(videoId)) return {};
     const index = await getIndex();
     if (!comments || comments.length === 0) {
       delete index[videoId];
     } else {
-      const existingTitle = index[videoId] && index[videoId].title ? index[videoId].title : '';
+      const hasExisting = Object.prototype.hasOwnProperty.call(index, videoId);
+      const existingTitle = hasExisting && index[videoId] && index[videoId].title ? index[videoId].title : '';
       const inferredTitle = videoTitle || comments.find((c) => c.videoTitle)?.videoTitle || existingTitle || `Video ${videoId}`;
       index[videoId] = {
         videoId,
@@ -412,7 +414,7 @@
     let importedComments = 0;
 
     for (const [videoId, entry] of Object.entries(parsed.videos)) {
-      if (!/^[\w-]{11}$/.test(videoId)) continue;
+      if (!Common.isValidVideoId(videoId)) continue;
       const incomingList = Array.isArray(entry) ? entry : (entry && Array.isArray(entry.comments) ? entry.comments : []);
       const validIncoming = Common.validateCommentsArray(incomingList, videoId);
       if (validIncoming.length === 0) continue;

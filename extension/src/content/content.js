@@ -132,6 +132,7 @@
     toggleBtn.className = 'ytt-toggle-btn';
     toggleBtn.title = I18n.t('panelToggle');
     toggleBtn.setAttribute('aria-label', I18n.t('panelToggle'));
+    toggleBtn.setAttribute('aria-expanded', String(!isCollapsed));
     toggleBtn.textContent = '−';
 
     headerActions.append(countBadge, toggleBtn);
@@ -180,7 +181,7 @@
     currentTimeText.textContent = '00:00';
     const captureCaption = document.createElement('span');
     captureCaption.className = 'ytt-capture-caption';
-    captureCaption.textContent = 'instante actual';
+    captureCaption.textContent = I18n.t('captureCaption');
     captureTime.append(captureDot, currentTimeText, captureCaption);
 
     const captureBtn = document.createElement('button');
@@ -298,6 +299,7 @@
       progress,
       playhead,
       currentTimeText,
+      captureCaption,
       captureBtn,
       textarea,
       selectedColorName,
@@ -320,6 +322,7 @@
       isCollapsed = !isCollapsed;
       ui.body.hidden = isCollapsed;
       ui.toggleBtn.textContent = isCollapsed ? '＋' : '−';
+      ui.toggleBtn.setAttribute('aria-expanded', String(!isCollapsed));
     });
 
     captureBtn.addEventListener('click', () => {
@@ -394,6 +397,7 @@
     ui.toggleBtn.title = I18n.t('panelToggle');
     ui.toggleBtn.setAttribute('aria-label', I18n.t('panelToggle'));
     ui.timeline.setAttribute('aria-label', I18n.t('timelineLabel'));
+    if (ui.captureCaption) ui.captureCaption.textContent = I18n.t('captureCaption');
     ui.captureBtn.title = I18n.t('captureTitle');
     ui.captureBtn.setAttribute('aria-label', I18n.t('captureTitle'));
     ui.textarea.placeholder = I18n.t('notePlaceholder');
@@ -522,21 +526,35 @@
     colors.setAttribute('role', 'radiogroup');
     colors.setAttribute('aria-label', I18n.t('colorPickerLabel'));
 
-    Common.COLORS.forEach((color) => {
+    Common.COLORS.forEach((color, index) => {
       const dot = document.createElement('button');
       dot.type = 'button';
       dot.className = 'ytt-color-choice';
       dot.style.setProperty('--swatch', color.value);
       dot.setAttribute('role', 'radio');
       dot.setAttribute('aria-checked', String(color.value === editingColor.value));
+      dot.tabIndex = color.value === editingColor.value ? 0 : -1;
       dot.setAttribute('aria-label', I18n.colorLabel(color.value));
       dot.title = I18n.colorLabel(color.value);
       dot.addEventListener('click', () => {
         editingColor = color;
         colors.querySelectorAll('.ytt-color-choice').forEach((el) => {
           el.setAttribute('aria-checked', 'false');
+          el.tabIndex = -1;
         });
         dot.setAttribute('aria-checked', 'true');
+        dot.tabIndex = 0;
+      });
+      dot.addEventListener('keydown', (event) => {
+        event.stopPropagation();
+        if (!['ArrowRight', 'ArrowLeft'].includes(event.key)) return;
+        event.preventDefault();
+        const next = (index + (event.key === 'ArrowRight' ? 1 : -1) + Common.COLORS.length) % Common.COLORS.length;
+        const target = colors.children[next];
+        if (target) {
+          target.focus();
+          target.click();
+        }
       });
       colors.append(dot);
     });
@@ -622,7 +640,7 @@
   function renderTimeline(duration) {
     if (!ui.timeline) return;
     ui.timeline.querySelectorAll('.ytt-marker').forEach((m) => m.remove());
-    comments.forEach((comment) => {
+    comments.forEach((comment, index) => {
       const marker = document.createElement('button');
       marker.type = 'button';
       marker.className = 'ytt-marker';
@@ -633,6 +651,15 @@
       marker.title = `${markerTime} · ${comment.text}`;
       marker.setAttribute('aria-label', I18n.t('markerLabel', { time: markerTime, text: comment.text }));
       marker.addEventListener('click', () => seekTo(comment.timestamp));
+      marker.addEventListener('keydown', (event) => {
+        event.stopPropagation();
+        if (!['ArrowRight', 'ArrowLeft'].includes(event.key)) return;
+        event.preventDefault();
+        const markers = ui.timeline.querySelectorAll('.ytt-marker');
+        if (markers.length === 0) return;
+        const next = (index + (event.key === 'ArrowRight' ? 1 : -1) + markers.length) % markers.length;
+        if (markers[next]) markers[next].focus();
+      });
       ui.timeline.append(marker);
     });
   }
@@ -858,7 +885,7 @@
     }
   }
 
-  // Alt+N: salta al instante actual y enfoca el campo de nota, sin salir del reproductor.
+  // Alt+N: captura el segundo en curso y enfoca el campo de nota, sin salir del reproductor.
   document.addEventListener('keydown', (event) => {
     if (!event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
     if (event.key.toLowerCase() !== 'n') return;
@@ -871,6 +898,7 @@
       isCollapsed = false;
       ui.body.hidden = false;
       ui.toggleBtn.textContent = '−';
+      ui.toggleBtn.setAttribute('aria-expanded', 'true');
     }
     updateClock();
     ui.textarea.focus();

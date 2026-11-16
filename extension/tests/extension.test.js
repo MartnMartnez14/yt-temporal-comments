@@ -619,7 +619,7 @@ test('i18n: no quedan textos de interfaz en español fuera del diccionario', () 
     'Importar JSON', 'Exportar Markdown', 'Sincronizar con Chrome Sync', 'Momentos guardados',
     'Videos con notas', 'Abrí cualquier video', 'Eliminar momento', 'Saltar a este momento',
     'Marcadores de comentarios', 'Resumen de actividad', 'Respaldo de datos', 'Color del marcador',
-    'Escribí una nota', 'No se detectó un video activo',
+    'Escribí una nota', 'No se detectó un video activo', 'instante actual',
   ];
   const sources = [
     path.join(SRC_DIR, 'content', 'content.js'),
@@ -654,6 +654,7 @@ test('content.js: el panel repinta sus textos cuando cambia el idioma', () => {
 
   assert.match(source, /I18n\.setLanguage\(languagePreference\)/);
   assert.match(source, /I18n\.t\('saveMoment'\)/);
+  assert.match(source, /I18n\.t\('captureCaption'\)/);
   assert.match(source, /I18n\.colorLabel\(color\.value\)/);
   // El idioma se lee del almacenamiento y se reaplica cuando el popup lo cambia.
   assert.match(source, /Store\.getSettings\(\)/);
@@ -960,4 +961,54 @@ test('content.js: el panel sólo se monta en la página de reproducción', () =>
   assert.match(source, /esPaginaDeReproduccion/);
   // Sin esa guarda el panel se monta en Shorts dentro de un #below de 0x0, invisible.
   assert.match(source, /if \(!videoId \|\| !esPaginaDeReproduccion\)/);
+});
+
+test('accesibilidad WCAG 2.2 AA: foco visible, aria-expanded, teclado en editor y marcadores', () => {
+  const contentJs = fs.readFileSync(path.join(SRC_DIR, 'content', 'content.js'), 'utf8');
+  const contentCss = fs.readFileSync(path.join(SRC_DIR, 'content', 'content.css'), 'utf8');
+  const popupCss = fs.readFileSync(path.join(SRC_DIR, 'popup', 'popup.css'), 'utf8');
+
+  // El botón de colapsar informa su estado expandido/colapsado.
+  assert.match(contentJs, /setAttribute\('aria-expanded', String\(!isCollapsed\)\)/);
+  // Navegación por teclado con flechas en los marcadores de la línea de tiempo y en los colores.
+  const arrowMatches = contentJs.match(/\['ArrowRight', 'ArrowLeft'\]/g) || [];
+  assert.equal(arrowMatches.length, 3, 'El selector principal, el editor en línea y los marcadores deben soportar flechas');
+
+  // Estilos :focus-visible en el panel y en el popup.
+  assert.match(contentCss, /\.ytt-toggle-btn:focus-visible/);
+  assert.match(contentCss, /\.ytt-save-btn:focus-visible/);
+  assert.match(contentCss, /\.ytt-filter-dot:focus-visible/);
+  assert.match(popupCss, /\.action-btn:focus-visible/);
+  assert.match(popupCss, /\.video-row:focus-visible/);
+});
+
+test('seguridad defensiva: importFromJson rechaza claves de prototipo (constructor, __proto__) y sanea entradas', async () => {
+  storageMock.reset();
+  assert.equal(Common.isValidVideoId('constructor'), false);
+  assert.equal(Common.isValidVideoId('__proto__'), false);
+  assert.equal(Common.isValidVideoId('dQw4w9WgXcQ'), true);
+
+  const payload = JSON.stringify({
+    app: 'yt-temporal-comments',
+    version: 1,
+    videos: {
+      constructor: [
+        { id: 'mal-1', timestamp: 10, text: 'Intento sobre constructor', color: '#f07159' },
+      ],
+      dQw4w9WgXcQ: [
+        { id: 'ok-1', timestamp: 12, text: '  <img src=x onerror=alert(1)>  ', color: '#no-existe' },
+        { id: 'bad-ts', timestamp: -5, text: 'Negativo', color: '#f07159' },
+      ],
+    },
+  });
+
+  const res = await Store.importFromJson(payload);
+  assert.equal(res.importedVideos, 1);
+  assert.equal(res.importedComments, 1);
+
+  const saved = await Store.getComments('dQw4w9WgXcQ');
+  assert.equal(saved.length, 1);
+  assert.equal(saved[0].text, '<img src=x onerror=alert(1)>');
+  assert.equal(saved[0].color, Common.COLORS[0].value);
+  assert.equal((await Store.getComments('constructor')).length, 0);
 });

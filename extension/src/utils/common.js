@@ -59,6 +59,12 @@
     }
   }
 
+  function isValidVideoId(value) {
+    return typeof value === 'string'
+      && /^[\w-]{11}$/.test(value)
+      && !Object.prototype.hasOwnProperty.call(Object.prototype, value);
+  }
+
   function extractVideoId(rawUrl) {
     if (typeof rawUrl !== 'string' || !rawUrl.trim()) return null;
     let parsed;
@@ -79,7 +85,7 @@
         if (match) id = match[1];
       }
     }
-    return id && /^[\w-]{11}$/.test(id) ? id : null;
+    return isValidVideoId(id) ? id : null;
   }
 
   function isValidColor(colorValue) {
@@ -88,9 +94,9 @@
 
   function sanitizeComment(raw, fallbackVideoId = null) {
     if (!raw || typeof raw !== 'object') return null;
-    const videoId = typeof raw.videoId === 'string' && /^[\w-]{11}$/.test(raw.videoId)
+    const videoId = isValidVideoId(raw.videoId)
       ? raw.videoId
-      : (typeof fallbackVideoId === 'string' && /^[\w-]{11}$/.test(fallbackVideoId) ? fallbackVideoId : null);
+      : (isValidVideoId(fallbackVideoId) ? fallbackVideoId : null);
     if (!videoId) return null;
 
     const id = typeof raw.id === 'string' && raw.id.trim()
@@ -222,6 +228,7 @@
     MAX_COMMENT_LENGTH,
     formatTime,
     formatCommentDate,
+    isValidVideoId,
     extractVideoId,
     isValidColor,
     sanitizeComment,

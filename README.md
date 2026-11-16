@@ -4,9 +4,9 @@
 
 Repositorio oficial: [MartnMartnez14/yt-temporal-comments](https://github.com/MartnMartnez14/yt-temporal-comments)
 
-Estado: extensión completa y probada (v0.10.1, Manifest V3), ya bilingüe. La cuenta de desarrollador
-está registrada y verificada y el proyecto está en la etapa de publicación en la Chrome Web Store.
-La extensión es gratuita y no tiene funciones de pago.
+Estado: extensión completa y probada (v1.0.0, Manifest V3), bilingüe español/inglés. La cuenta de
+desarrollador está registrada y verificada y el proyecto está listo para su publicación en la Chrome
+Web Store. La extensión es gratuita y no tiene funciones de pago.
 
 ---
 
@@ -106,7 +106,7 @@ cd extension
 node --test tests/extension.test.js
 ```
 
-Salida esperada: `ℹ tests 40`, `ℹ pass 40`, `ℹ fail 0`. Cubren la validación y el saneamiento de notas, la capa de almacenamiento contra un mock de `chrome.storage`, el formateo de fechas, la exportación JSON y Markdown, el índice de videos, el contrato de render del panel (fecha/hora por nota, eventos del reloj, atajo `Alt+N`, edición de notas y reubicación en modo cine), el bilingüe (mismas claves en ambos idiomas, fechas y nombres de colores) y reglas de seguridad estática (sin `innerHTML`, sin recursos remotos).
+Salida esperada: `ℹ tests 42`, `ℹ pass 42`, `ℹ fail 0`. Cubren la validación y el saneamiento de notas (incluyendo claves de prototipo al importar JSON), la capa de almacenamiento contra un mock de `chrome.storage`, el formateo de fechas, la exportación JSON y Markdown, el índice de videos, el contrato de render del panel (fecha/hora por nota, eventos del reloj, atajo `Alt+N`, edición de notas y reubicación en modo cine), el bilingüe (mismas claves en ambos idiomas, fechas y nombres de colores), accesibilidad WCAG 2.2 AA (`:focus-visible`, `aria-expanded` y navegación por teclado) y reglas de seguridad estática (sin `innerHTML`, sin recursos remotos y sin datos de cobro en el paquete).
 
 El CSS del panel vive en `extension/src/content/content.css` y se publica como texto en
 `extension/src/content/styles.js`, generado con:

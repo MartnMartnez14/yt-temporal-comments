@@ -102,11 +102,25 @@ Al editar **no se pierde el minuto ni la fecha original**: la nota sigue en el m
 ## 8. Borrar una nota
 
 Tocá la **cruz** a la derecha de la nota. Se borra en el acto, sin vuelta atrás, así que conviene
-tener un respaldo (ver el punto siguiente).
+tener un respaldo (ver más abajo).
 
 ---
 
-## 9. Llevarte las notas a otro lado
+## 9. Buscar y filtrar tus notas
+
+Cuando tenés muchas notas, podés encontrarlas rápido desde dos lugares:
+
+- **En el panel del video actual**: arriba del listado hay una caja de búsqueda por texto y una fila
+  con **Todos** más los 10 colores. Podés combinar ambos filtros (por ejemplo, buscar una palabra solo
+  en las notas amarillas). El buscador no distingue mayúsculas ni tildes (*"practica"* encuentra
+  *"Práctica"*).
+- **En el icono de la extensión (todos tus videos)**: la caja de búsqueda del panel general busca en
+  las notas de todos los videos que hayas marcado. Al tocar un resultado, se abre YouTube directamente
+  en ese video y en el segundo exacto de la nota.
+
+---
+
+## 10. Llevarte las notas a otro lado
 
 El icono de la extensión abre el panel de gestión, con los videos donde tenés notas y dos formas de
 exportar:
@@ -122,7 +136,7 @@ exportar:
 
 ---
 
-## 10. Cambiar el idioma
+## 11. Cambiar el idioma
 
 En el panel de la extensión hay un desplegable de idioma: **Automático**, **Español** o **English**.
 
@@ -133,11 +147,14 @@ Las fechas se mantienen siempre en `dd/mm/aaaa` y `hh:mm:ss` en los dos idiomas.
 
 ---
 
-## 11. Dónde viven tus notas
+## 12. Dónde viven tus notas
 
 - Se guardan en tu navegador (`chrome.storage.local`) en el momento en que tocás Guardar.
 - Si activás **Sincronizar con Chrome Sync**, además se copian a tu cuenta de Google, y así las
   tenés en otras computadoras con el mismo perfil.
+- Chrome Sync tiene un límite propio de capacidad por video (8 KB) y total (100 KB). Si las notas de
+  un video superan ese tope, **no se pierden**: quedan guardadas en tu equipo y el panel del icono te
+  avisa qué videos están solo en esta computadora para que puedas exportar un respaldo JSON.
 - No se envían a ningún servidor del proyecto y no hay cuentas ni registros.
 
 Consecuencia práctica: si desinstalás la extensión o borrás los datos del navegador sin tener sync ni
@@ -145,30 +162,30 @@ respaldo, las notas se pierden. Una exportación de vez en cuando no está de m�
 
 ---
 
-## 12. Problemas comunes
+## 13. Problemas comunes
 
 **No veo el panel en el video.**
-Fijate que estés en `youtube.com/watch` (un video, no la página principal). Si acabás de instalar o
-recargar la extensión, refrescá la pestaña.
+Fijate que estés en `youtube.com/watch` (un video común, no la portada ni un Short). Si acabás de
+instalar o recargar la extensión, refrescá la pestaña.
 
-**El panel quedó en un lugar raro.**
-En modo cine se ubica abajo del reproductor, antes de los comentarios; en la vista normal vuelve a la
-columna lateral. Si cambiás de vista con el reproductor, esperá un segundo: se reacomoda solo.
+**El panel quedó en un lugar raro o desapareció en pantalla completa.**
+En modo cine (o si la ventana es angosta) se ubica abajo del reproductor, antes de los comentarios; en
+la vista normal vuelve a la columna lateral. En pantalla completa el panel se oculta a propósito para
+no tapar el video y reaparece apenas salís.
 
 **Guardé una nota y no la veo.**
-Mirá que el video sea el mismo: cada video tiene su propia lista. También revisá que el panel no esté
-colapsado con el botón `−`.
+Mirá que el video sea el mismo: cada video tiene su propia lista. Revisá también que no haya quedado
+un texto escrito o un color marcado en el filtro de búsqueda, y que el panel no esté colapsado con el
+botón `−`.
 
 **Cambié de computadora y no están mis notas.**
-Sin Chrome Sync activo las notas son locales. Exportá el JSON en la máquina vieja e importalo en la
-nueva.
+Sin Chrome Sync activo (o si un video superó el límite de cuota de Chrome Sync) las notas quedan en el
+equipo donde las creaste. Exportá el JSON en la máquina vieja e importalo en la nueva.
 
 ---
 
-## 13. Lo que todavía no hace
+## 14. Lo que no hace
 
-Para que no lo busques: no exporta a PDF ni a otros formatos, no tiene buscador dentro de las notas,
-no sincroniza con servicios que no sean Chrome Sync, y no hay versión para celular (el panel se
-instala en el navegador de escritorio).
-
-Varias de esas cosas están anotadas en la [hoja de ruta](ROADMAP.md).
+Para que no lo busques: no publica nada en los comentarios públicos de YouTube, no exporta a PDF, no
+sincroniza con servicios externos que no sean Chrome Sync y no tiene versión para celular (la
+extensión funciona en el navegador de escritorio).
