@@ -12,17 +12,22 @@ Web Store. La extensión es gratuita y no tiene funciones de pago.
 
 ## Vista previa
 
-Capturas del **prototipo original en Flask** (`web-prototype/`), que conserva la misma
-interacción de base. La extensión actual aplica esa misma lógica sobre el reproductor de
-YouTube, con una estética oscura y un degradé neón propio.
+Capturas de la extensión funcionando sobre YouTube (v1.0.0, Chrome real).
 
-Así se ven la línea temporal con marcadores de colores y las notas asociadas a cada momento:
+Panel de notas junto al reproductor: cada momento marcado queda en la línea de tiempo con su color,
+su texto y la fecha y hora en que lo guardaste.
 
-![Prototipo en funcionamiento: marcadores de color y notas temporales](demo/prototipo-notas-temporales.jpg)
+![Panel de la extensión sobre un video de YouTube, con marcadores de color y notas](demo/extension-panel-notas.png)
 
-Al seleccionar un marcador o una nota, el reproductor salta directamente a ese instante:
+Editor de una nota: el instante actual se captura solo, elegís el texto y uno de los diez colores
+sin perder el marcador.
 
-![Prototipo en funcionamiento: salto a un momento marcado](demo/prototipo-salto-temporal.jpg)
+![Editor de nota con el instante actual, el texto y la paleta de diez colores](demo/extension-editor-color.png)
+
+Popup de la extensión: resumen de videos con notas, sincronización opcional con Chrome Sync,
+selector de idioma, buscador general y los respaldos en JSON y Markdown.
+
+![Popup de la extensión con el resumen de videos, la sincronización y las opciones de idioma y respaldo](demo/extension-popup.png)
 
 ---
 
@@ -179,3 +184,8 @@ Para dudas, errores o pedidos de mejora del proyecto:
 ## Licencia
 
 Este proyecto se distribuye bajo la licencia MIT. Consultá el archivo [LICENSE](LICENSE).
+
+---
+
+*Guiño: las capturas de esta página salieron de una tarde viendo videos. Perdón, pero me encanta
+Leo Leslie. 😄*

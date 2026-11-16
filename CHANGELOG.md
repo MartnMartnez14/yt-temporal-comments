@@ -18,7 +18,12 @@ El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/
 - **Activos gráficos listos para la Chrome Web Store (`store-assets/`)**: icono de tienda `128×128`
   con arte centrado en `96×96` (`store-icon-128.png`), imagen promocional pequeña `440×280` RGB sin
   transparencia (`promo-small.png`) y las 5 capturas `1280×800` RGB de la extensión en
-  funcionamiento (`store-assets/screenshots/`).
+  funcionamiento (`store-assets/screenshots/`), tomadas de YouTube real con la extensión cargada por
+  `tools/capturas/capturar-tienda.mjs`. El README muestra tres capturas del panel, del editor y del
+  popup en `demo/extension-*.png`.
+- **Notas de demo para capturas**: `tools/notas-demo-capturas.json` con 11 notas repartidas en tres
+  videos, importable desde el popup con **Importar JSON** para rehacer capturas sin escribirlas a
+  mano.
 - **Pie de apoyo en el popup**: una tarjeta minimalista y bilingüe con Ko-fi ("Invitame un
   cafecito · voluntario") al pie del popup, pegada al borde inferior con `position: sticky` porque
   con varios videos el contenido supera los 600 px que permite Chrome. Sólo Ko-fi: no viajan datos
