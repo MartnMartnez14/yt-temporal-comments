@@ -7,6 +7,10 @@ El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/
 
 ## [1.0.0] - 2026-11-14
 
+ID de la extensión en la Chrome Web Store: `bjkhlbialpidkbpdbelenkpmijnikbb` (ítem creado el
+16/11/2026 bajo el editor `Martin Martinez 23`). Paquete 1.0.0 enviado a revisión el **16/11/2026**;
+queda pendiente la aprobación de Google y la publicación.
+
 ### Añadido
 - **Accesibilidad WCAG 2.2 AA y seguridad defensiva**: estilos `:focus-visible` en todos los
   controles interactivos del panel y del popup, atributo `aria-expanded` en el botón de colapsar el
