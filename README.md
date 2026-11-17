@@ -188,4 +188,4 @@ Este proyecto se distribuye bajo la licencia MIT. Consultá el archivo [LICENSE]
 ---
 
 *Guiño: las capturas de esta página salieron de una tarde viendo videos. Perdón, pero me encanta
-Leo Leslie. 😄*
+League of Legends / Riot Games. 😄*
